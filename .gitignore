@@ -5,4 +5,4 @@ __pycache__/
 projects/*/*.wav
 studio/node_modules/
 studio/out/
-studio/public/
+studio/public/door/original.mp4

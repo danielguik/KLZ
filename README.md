@@ -26,3 +26,12 @@ Novo efeito = uma entrada em `klz/effects.py` (aparece sozinho no painel e para 
 - Prévia = render FFmpeg em meia resolução (não é tempo real como no After Effects).
 - Dublagem e agente exigem chaves de API e **não foram testados de ponta a ponta** (sem chaves); render e UI foram testados.
 - Sem lip-sync de rosto ainda (ex.: integrar VideoReTalking/Wav2Lip em `dubbing.py`).
+
+## Rodar o Studio na sua máquina (passo a passo)
+```
+git clone https://github.com/danielguik/klz.git && cd klz
+git checkout claude/affectionate-albattani-1ny0vj
+cp "SEU_VIDEO.mp4" studio/public/door/original.mp4     # o vídeo original NÃO está no Git
+cd studio && npm install && npm start                   # abre http://localhost:3000 (composição "Reel")
+```
+Precisa de Node 18+. Os áudios da dublagem (`studio/public/door/dub_*.wav`) já vêm no repositório.
