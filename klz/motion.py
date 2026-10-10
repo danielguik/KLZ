@@ -7,10 +7,10 @@ def _t(s):  # ASS time h:mm:ss.cc
     return f"{int(h)}:{int(m):02d}:{r:05.2f}"
 
 
-def build_ass(words, w, h, keywords=(), font="DejaVu Sans", base=0.052, key_color="&H0040C8FF", y_frac=0.74, group=4):
+def build_ass(words, w, h, keywords=(), font="DejaVu Sans", base=0.052, key_color="&H0040C8FF", y_frac=0.74, group=4, max_chars=19):
     """words: [{'start','end','text'}]. Mostra grupos de `group` palavras; a palavra falada ganha 'pop' e
     as palavras-chave ficam maiores, coloridas e permanecem destacadas até o fim do grupo."""
-    fs, kfs = int(h * base), int(h * base * 1.22)
+    fs, kfs = int(h * base), int(h * base * 1.12)
     head = (f"[Script Info]\nScriptType: v4.00+\nPlayResX: {w}\nPlayResY: {h}\nWrapStyle: 2\n\n"
             f"[V4+ Styles]\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,"
             f"Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding\n"
@@ -18,8 +18,15 @@ def build_ass(words, w, h, keywords=(), font="DejaVu Sans", base=0.052, key_colo
             f"[Events]\nFormat: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text\n")
     kws = {k.lower() for k in keywords}
     out = []
-    for g in range(0, len(words), group):
-        chunk = words[g:g + group]
+    groups, cur = [], []
+    for wd in words:  # grupos curtos (<=group palavras, <=max_chars), nunca cruzam frases
+        n = sum(len(x["text"]) + 1 for x in cur) + len(wd["text"])
+        if cur and (len(cur) >= group or n > max_chars or wd.get("p") != cur[-1].get("p")):
+            groups.append(cur); cur = []
+        cur.append(wd)
+    if cur:
+        groups.append(cur)
+    for chunk in groups:
         g_end = chunk[-1]["end"]
         for i, cur in enumerate(chunk):
             start = cur["start"]
@@ -29,11 +36,11 @@ def build_ass(words, w, h, keywords=(), font="DejaVu Sans", base=0.052, key_colo
                 txt = wd["text"].strip().replace("{", "(")
                 is_key = txt.lower().strip(".,!?;:") in kws
                 if j > i:
-                    parts.append(f"{{\\alpha&HFF&}}{txt}")           # ainda não falada: invisível (mantém layout)
+                    parts.append(f"{{\\alpha&H88&}}{txt}{{\\alpha&H00&}}")           # ainda não falada: invisível (mantém layout)
                 elif j == i:                                          # palavra atual: pop de escala
                     tags = f"\\fscx60\\fscy60\\t(0,120,\\fscx118\\fscy118)\\t(120,220,\\fscx100\\fscy100)"
                     if is_key:
-                        tags += f"\\c{key_color}\\fs{kfs}\\t(0,150,\\fscx135\\fscy135)"
+                        tags += f"\\c{key_color}\\fs{kfs}\\t(0,150,\\fscx120\\fscy120)\\t(150,260,\\fscx100\\fscy100)"
                     parts.append(f"{{{tags}}}{txt}{{\\r}}")
                 else:                                                 # já falada: fica; chave continua destacada
                     parts.append(f"{{\\c{key_color}\\fs{kfs}}}{txt}{{\\r}}" if is_key else txt)

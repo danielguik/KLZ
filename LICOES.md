@@ -6,3 +6,8 @@
 - Legendas antigas queimadas no vídeo: cobrir com cartão de vidro (blur 30 + tint escuro) um pouco maior que a área do texto.
 - Legenda ASS: palavras ainda não faladas ficam invisíveis mas ocupam espaço -> a palavra atual aparece descentralizada. A melhorar (centralizar por palavra).
 - `pkill -f` com o texto do próprio comando mata o shell. Não usar.
+- As legendas queimadas no vídeo original são o roteiro mais confiável (ler com frames a cada 1,6s): corrigiram "Omax"→DoorMaxx, "Alucomaxx e DoorMaxx", -14°C. Sempre conferir a transcrição contra elas.
+- XTTS-v2 (grátis, CPU) clona a voz do falante; ~40s por frase. Exige venv py3.11, transformers==4.57.1 e patch de torchaudio.load (torchcodec quebra sem CUDA). Licença CPML: só uso não comercial.
+- Frases em inglês costumam ficar mais longas que o tempo do original: juntar frases vizinhas e usar pausas do original; velocidade >1.35 soa apressada.
+- Pitch (f0) não separa bem os dois falantes aqui: tratei como um único narrador.
+- `pkill -f`/`ps|grep` com o nome do script no próprio comando mata o shell (erro 144). Usar `pgrep -f` + checar /proc/<pid>/cmdline.
