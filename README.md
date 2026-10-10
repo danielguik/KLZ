@@ -35,3 +35,6 @@ cp "SEU_VIDEO.mp4" studio/public/door/original.mp4     # o vídeo original NÃO 
 cd studio && npm install && npm start                   # abre http://localhost:3000 (composição "Reel")
 ```
 Precisa de Node 18+. Os áudios da dublagem (`studio/public/door/dub_*.wav`) já vêm no repositório.
+
+## App web (KLZ Editor) — sem instalar nada
+`app/klz-editor.html` é um editor de arquivo único (preview, timeline, camadas, edição da tradução, exportação de vídeo). Fonte: `app/template.html`; montar com `python -m klz.build_app`. Abra o vídeo original dentro do app (ele não vai embutido). Use o Chrome no computador.

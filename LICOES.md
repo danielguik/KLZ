@@ -20,3 +20,5 @@
 - Chromium do Playwright não toca H.264: para screenshot do Studio, trocar temporariamente o vídeo por webm (e restaurar).
 - Verificar QUEM fala antes de lip-sync: embeddings ECAPA (speechbrain) + olhar a boca nos frames. Aqui é 1 narrador (camisa preta).
 - Não entregar como "melhor versão" algo que eu mesmo vejo que não está bom: dizer o que falta antes.
+- App web (artifact): download só via capability `downloads` (Blob ok, mp4/webm/json). Exportar = MediaRecorder em tempo real (canvas.captureStream + AudioContext); preferir mp4 só com H.264. Testado: 64s -> 17 MB a 540p. Regra `[hidden]{display:none!important}` precisa estar no CSS do app.
+- Arrastar elemento da timeline: não re-renderizar a timeline no pointerdown (destrói o elemento com pointer capture).
