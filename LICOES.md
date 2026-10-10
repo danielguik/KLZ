@@ -11,3 +11,7 @@
 - Frases em inglês costumam ficar mais longas que o tempo do original: juntar frases vizinhas e usar pausas do original; velocidade >1.35 soa apressada.
 - Pitch (f0) não separa bem os dois falantes aqui: tratei como um único narrador.
 - `pkill -f`/`ps|grep` com o nome do script no próprio comando mata o shell (erro 144). Usar `pgrep -f` + checar /proc/<pid>/cmdline.
+- Wav2Lip (grátis, CPU): ~3,5s por lote de 32 frames (~25s de vídeo = ~11 min). Pesos em HF (Nekochu/Wav2Lip, camenduru/Wav2Lip s3fd). Corrige a boca do homem que fala; só processar trechos COM rosto (detectar com s3fd por frame), senão dá "Face not detected".
+- ffmpeg `-t 0` = sem limite! Nunca gerar segmento de duração 0 (duplicou o vídeo).
+- Áudio dublado mais curto que o vídeo + `-shortest` corta o vídeo: usar apad e -t total.
+- Lip-sync não é perfeito (Wav2Lip embaça a boca); ElevenLabs+Sync Labs seriam melhores quando houver chaves.

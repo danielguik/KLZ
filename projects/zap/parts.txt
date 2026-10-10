@@ -1,0 +1,4 @@
+file '/home/user/KLZ/projects/zap/seg1_lipv.mp4'
+file '/home/user/KLZ/projects/zap/seg2.mp4'
+file '/home/user/KLZ/projects/zap/seg3_lipv.mp4'
+file '/home/user/KLZ/projects/zap/seg4.mp4'
