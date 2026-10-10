@@ -15,3 +15,8 @@
 - ffmpeg `-t 0` = sem limite! Nunca gerar segmento de duração 0 (duplicou o vídeo).
 - Áudio dublado mais curto que o vídeo + `-shortest` corta o vídeo: usar apad e -t total.
 - Lip-sync não é perfeito (Wav2Lip embaça a boca); ElevenLabs+Sync Labs seriam melhores quando houver chaves.
+- Remotion 4.0.534 exige zod 4.5.4 exato; `.step()` do zod vira validação estrita (rejeita 64.62): não usar. Para o botão Save do Studio funcionar, defaultProps tem de ser literal no Root.tsx (gerado por make_project).
+- Remotion na nuvem: usar chrome headless_shell do Playwright; `--scale` precisa dar largura/altura inteiras (0.75 ok, 0.667 não).
+- Chromium do Playwright não toca H.264: para screenshot do Studio, trocar temporariamente o vídeo por webm (e restaurar).
+- Verificar QUEM fala antes de lip-sync: embeddings ECAPA (speechbrain) + olhar a boca nos frames. Aqui é 1 narrador (camisa preta).
+- Não entregar como "melhor versão" algo que eu mesmo vejo que não está bom: dizer o que falta antes.

@@ -1,83 +1,83 @@
 [
  {
-  "dur": 3.104667,
-  "speed": 1.27,
   "i": 0,
-  "file": "279fc3a061.wav",
+  "file": "bb47cd02ef.wav",
   "s": 0.0,
   "slot": 3.75,
-  "en": "We're here in Hopedale, Massachusetts, in the United States,"
+  "dur": 3.712667,
+  "speed": 1.0,
+  "en": "We're here in Hopedale, Massachusetts, in the US,"
  },
  {
-  "dur": 3.062,
-  "speed": 1.2,
   "i": 1,
-  "file": "c4a18b2b38.wav",
+  "file": "1e78287bd8.wav",
   "s": 3.8,
   "slot": 3.2,
-  "en": "to check out how this Imp\u00e9rio line door turned out,"
+  "dur": 3.062,
+  "speed": 1.0,
+  "en": "to see how this Imp\u00e9rio line door turned out,"
  },
  {
-  "dur": 4.128667,
-  "speed": 1.1,
   "i": 2,
-  "file": "ab1c7a9ed2.wav",
+  "file": "9b4cd8c250.wav",
   "s": 7.0,
-  "slot": 4.1,
-  "en": "when we installed it, it was minus 14 Celsius, and snow was everywhere."
+  "slot": 4.1499999999999995,
+  "dur": 4.224667,
+  "speed": 1.35,
+  "en": "When we installed it: minus 14 Celsius, snow everywhere, all white."
  },
  {
   "i": 3,
-  "file": "c41c00307b.wav",
-  "s": 10.8,
-  "slot": 2.1499999999999995,
-  "dur": 1.899333,
-  "speed": 1.27,
-  "en": "Now it's sunny, beautiful day."
+  "file": "b27f290fc4.wav",
+  "s": 11.2,
+  "slot": 1.45,
+  "dur": 1.568667,
+  "speed": 1.35,
+  "en": "Now, what a sunny day!"
  },
  {
-  "dur": 3.478,
-  "speed": 1.0,
   "i": 4,
-  "file": "f841c12c24.wav",
-  "s": 13.0,
-  "slot": 8.55,
-  "en": "I'm here with Rafael from Fast Shapes, seeing how it turned out."
+  "file": "4ec5861153.wav",
+  "s": 12.7,
+  "slot": 8.850000000000001,
+  "dur": 3.147333,
+  "speed": 1.0,
+  "en": "With Rafael from Fast Shapes, checking it out."
  },
  {
-  "dur": 5.291333,
-  "speed": 1.2,
   "i": 5,
-  "file": "4ee49cfae9.wav",
+  "file": "185488554c.wav",
   "s": 21.6,
   "slot": 5.95,
-  "en": "The owner of this house chose a recessed pull handle with an LED system, and also an electronic handle,"
+  "dur": 5.888667,
+  "speed": 1.0,
+  "en": "The homeowner chose a recessed pull handle with LED lighting, and an electronic handle,"
  },
  {
-  "dur": 12.470667,
-  "speed": 1.0,
   "i": 6,
-  "file": "569a6d6aae.wav",
+  "file": "7ef050912f.wav",
   "s": 27.6,
   "slot": 14.95,
-  "en": "Another Doormax exclusive. This handle, which is not only minimalist and beautiful, has an LED with a presence sensor when you walk up, and all the most modern unlocking technology out there."
+  "dur": 10.304667,
+  "speed": 1.0,
+  "en": "Another Doormaxx exclusive: this handle, minimalist and beautiful, with an LED presence sensor as you approach, plus the latest unlocking technology."
  },
  {
-  "dur": 2.784667,
-  "speed": 1.06,
   "i": 7,
-  "file": "64831e5493.wav",
+  "file": "c277fd2724.wav",
   "s": 42.6,
   "slot": 2.8499999999999988,
-  "en": "If you're in the US, it's available now."
+  "dur": 2.55,
+  "speed": 1.17,
+  "en": "If you live in the US, it's available now."
  },
  {
-  "dur": 5.984667,
-  "speed": 1.0,
   "i": 8,
-  "file": "2ff8e55350.wav",
+  "file": "2138e7f22f.wav",
   "s": 45.5,
   "slot": 7.849999999999999,
-  "en": "Contact Fast Shapes, and we'll take care of you with all the standard Alucomax and Doormax technology."
+  "dur": 4.726,
+  "speed": 1.0,
+  "en": "Contact Fast Shapes, and we'll take care of you with Alucomaxx and DoorMaxx tech."
  }
 ]

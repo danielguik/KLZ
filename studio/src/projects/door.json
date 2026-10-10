@@ -1,0 +1,872 @@
+{
+ "fps": 30,
+ "width": 1080,
+ "height": 1920,
+ "durationSec": 64.62,
+ "layers": [
+  {
+   "id": "vid",
+   "name": "Vídeo original",
+   "type": "video",
+   "start": 0,
+   "duration": 64.62,
+   "src": "door/original.mp4",
+   "trimStart": 0,
+   "volume": 0.0,
+   "brightness": 1,
+   "contrast": 1.05,
+   "saturate": 1.05,
+   "zoomPunches": []
+  },
+  {
+   "id": "cover",
+   "name": "Vidro (cobre legenda antiga)",
+   "type": "glass",
+   "start": 0,
+   "duration": 64.62,
+   "enter": false,
+   "x": 0.03,
+   "y": 0.725,
+   "w": 0.94,
+   "h": 0.17,
+   "radius": 36,
+   "blur": 34,
+   "tint": "rgba(10,10,14,0.5)",
+   "borderColor": "rgba(255,255,255,0.45)"
+  },
+  {
+   "id": "dub0",
+   "name": "Voz EN 1: We're here in Hopedale, Mass",
+   "type": "audio",
+   "start": 0.0,
+   "duration": 3.76,
+   "src": "door/dub_0.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub1",
+   "name": "Voz EN 2: to see how this Império line",
+   "type": "audio",
+   "start": 3.8,
+   "duration": 3.11,
+   "src": "door/dub_1.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub2",
+   "name": "Voz EN 3: When we installed it: minus ",
+   "type": "audio",
+   "start": 7.0,
+   "duration": 4.2,
+   "src": "door/dub_2.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.018
+  },
+  {
+   "id": "dub3",
+   "name": "Voz EN 4: Now, what a sunny day!",
+   "type": "audio",
+   "start": 11.2,
+   "duration": 1.5,
+   "src": "door/dub_3.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.082
+  },
+  {
+   "id": "dub4",
+   "name": "Voz EN 5: With Rafael from Fast Shapes",
+   "type": "audio",
+   "start": 12.7,
+   "duration": 3.2,
+   "src": "door/dub_4.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub5",
+   "name": "Voz EN 6: The homeowner chose a recess",
+   "type": "audio",
+   "start": 21.6,
+   "duration": 5.94,
+   "src": "door/dub_5.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub6",
+   "name": "Voz EN 7: Another Doormaxx exclusive: ",
+   "type": "audio",
+   "start": 27.6,
+   "duration": 10.35,
+   "src": "door/dub_6.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub7",
+   "name": "Voz EN 8: If you live in the US, it's ",
+   "type": "audio",
+   "start": 42.6,
+   "duration": 2.6,
+   "src": "door/dub_7.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "dub8",
+   "name": "Voz EN 9: Contact Fast Shapes, and we'",
+   "type": "audio",
+   "start": 45.5,
+   "duration": 4.78,
+   "src": "door/dub_8.wav",
+   "trimStart": 0,
+   "volume": 1.0,
+   "rate": 1.0
+  },
+  {
+   "id": "cap",
+   "name": "Legendas EN (palavra a palavra)",
+   "type": "captions",
+   "start": 0,
+   "duration": 64.62,
+   "words": [
+    {
+     "text": "We're",
+     "start": 0.0,
+     "end": 0.448,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "here",
+     "start": 0.448,
+     "end": 0.832,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "in",
+     "start": 0.832,
+     "end": 1.088,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "Hopedale,",
+     "start": 1.088,
+     "end": 1.792,
+     "key": true,
+     "p": 0
+    },
+    {
+     "text": "Massachusetts,",
+     "start": 1.792,
+     "end": 2.817,
+     "key": true,
+     "p": 0
+    },
+    {
+     "text": "in",
+     "start": 2.817,
+     "end": 3.073,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "the",
+     "start": 3.073,
+     "end": 3.393,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "US,",
+     "start": 3.393,
+     "end": 3.713,
+     "key": false,
+     "p": 0
+    },
+    {
+     "text": "to",
+     "start": 3.8,
+     "end": 4.023,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "see",
+     "start": 4.023,
+     "end": 4.301,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "how",
+     "start": 4.301,
+     "end": 4.579,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "this",
+     "start": 4.579,
+     "end": 4.913,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "Império",
+     "start": 4.913,
+     "end": 5.415,
+     "key": true,
+     "p": 1
+    },
+    {
+     "text": "line",
+     "start": 5.415,
+     "end": 5.749,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "door",
+     "start": 5.749,
+     "end": 6.083,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "turned",
+     "start": 6.083,
+     "end": 6.528,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "out,",
+     "start": 6.528,
+     "end": 6.862,
+     "key": false,
+     "p": 1
+    },
+    {
+     "text": "When",
+     "start": 7.0,
+     "end": 7.315,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "we",
+     "start": 7.315,
+     "end": 7.525,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "installed",
+     "start": 7.525,
+     "end": 8.103,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "it:",
+     "start": 8.103,
+     "end": 8.366,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "minus",
+     "start": 8.366,
+     "end": 8.734,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "14",
+     "start": 8.734,
+     "end": 8.944,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "Celsius,",
+     "start": 8.944,
+     "end": 9.469,
+     "key": true,
+     "p": 2
+    },
+    {
+     "text": "snow",
+     "start": 9.469,
+     "end": 9.784,
+     "key": true,
+     "p": 2
+    },
+    {
+     "text": "everywhere,",
+     "start": 9.784,
+     "end": 10.467,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "all",
+     "start": 10.467,
+     "end": 10.73,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "white.",
+     "start": 10.73,
+     "end": 11.15,
+     "key": false,
+     "p": 2
+    },
+    {
+     "text": "Now,",
+     "start": 11.2,
+     "end": 11.511,
+     "key": false,
+     "p": 3
+    },
+    {
+     "text": "what",
+     "start": 11.511,
+     "end": 11.821,
+     "key": false,
+     "p": 3
+    },
+    {
+     "text": "a",
+     "start": 11.821,
+     "end": 11.977,
+     "key": false,
+     "p": 3
+    },
+    {
+     "text": "sunny",
+     "start": 11.977,
+     "end": 12.339,
+     "key": true,
+     "p": 3
+    },
+    {
+     "text": "day!",
+     "start": 12.339,
+     "end": 12.65,
+     "key": false,
+     "p": 3
+    },
+    {
+     "text": "With",
+     "start": 12.7,
+     "end": 13.043,
+     "key": false,
+     "p": 4
+    },
+    {
+     "text": "Rafael",
+     "start": 13.043,
+     "end": 13.501,
+     "key": true,
+     "p": 4
+    },
+    {
+     "text": "from",
+     "start": 13.501,
+     "end": 13.844,
+     "key": false,
+     "p": 4
+    },
+    {
+     "text": "Fast",
+     "start": 13.844,
+     "end": 14.188,
+     "key": true,
+     "p": 4
+    },
+    {
+     "text": "Shapes,",
+     "start": 14.188,
+     "end": 14.703,
+     "key": true,
+     "p": 4
+    },
+    {
+     "text": "checking",
+     "start": 14.703,
+     "end": 15.275,
+     "key": false,
+     "p": 4
+    },
+    {
+     "text": "it",
+     "start": 15.275,
+     "end": 15.504,
+     "key": false,
+     "p": 4
+    },
+    {
+     "text": "out.",
+     "start": 15.504,
+     "end": 15.847,
+     "key": false,
+     "p": 4
+    },
+    {
+     "text": "The",
+     "start": 21.6,
+     "end": 21.889,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "homeowner",
+     "start": 21.889,
+     "end": 22.524,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "chose",
+     "start": 22.524,
+     "end": 22.928,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "a",
+     "start": 22.928,
+     "end": 23.101,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "recessed",
+     "start": 23.101,
+     "end": 23.678,
+     "key": true,
+     "p": 5
+    },
+    {
+     "text": "pull",
+     "start": 23.678,
+     "end": 24.025,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "handle",
+     "start": 24.025,
+     "end": 24.487,
+     "key": true,
+     "p": 5
+    },
+    {
+     "text": "with",
+     "start": 24.487,
+     "end": 24.833,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "LED",
+     "start": 24.833,
+     "end": 25.122,
+     "key": true,
+     "p": 5
+    },
+    {
+     "text": "lighting,",
+     "start": 25.122,
+     "end": 25.757,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "and",
+     "start": 25.757,
+     "end": 26.045,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "an",
+     "start": 26.045,
+     "end": 26.276,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "electronic",
+     "start": 26.276,
+     "end": 26.969,
+     "key": false,
+     "p": 5
+    },
+    {
+     "text": "handle,",
+     "start": 26.969,
+     "end": 27.489,
+     "key": true,
+     "p": 5
+    },
+    {
+     "text": "Another",
+     "start": 27.6,
+     "end": 28.142,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "Doormaxx",
+     "start": 28.142,
+     "end": 28.745,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "exclusive:",
+     "start": 28.745,
+     "end": 29.468,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "this",
+     "start": 29.468,
+     "end": 29.83,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "handle,",
+     "start": 29.83,
+     "end": 30.372,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "minimalist",
+     "start": 30.372,
+     "end": 31.095,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "and",
+     "start": 31.095,
+     "end": 31.396,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "beautiful,",
+     "start": 31.396,
+     "end": 32.12,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "with",
+     "start": 32.12,
+     "end": 32.481,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "an",
+     "start": 32.481,
+     "end": 32.722,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "LED",
+     "start": 32.722,
+     "end": 33.024,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "presence",
+     "start": 33.024,
+     "end": 33.626,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "sensor",
+     "start": 33.626,
+     "end": 34.108,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "as",
+     "start": 34.108,
+     "end": 34.349,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "you",
+     "start": 34.349,
+     "end": 34.651,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "approach,",
+     "start": 34.651,
+     "end": 35.313,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "plus",
+     "start": 35.313,
+     "end": 35.675,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "the",
+     "start": 35.675,
+     "end": 35.976,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "latest",
+     "start": 35.976,
+     "end": 36.458,
+     "key": false,
+     "p": 6
+    },
+    {
+     "text": "unlocking",
+     "start": 36.458,
+     "end": 37.121,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "technology.",
+     "start": 37.121,
+     "end": 37.905,
+     "key": true,
+     "p": 6
+    },
+    {
+     "text": "If",
+     "start": 42.6,
+     "end": 42.796,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "you",
+     "start": 42.796,
+     "end": 43.041,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "live",
+     "start": 43.041,
+     "end": 43.336,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "in",
+     "start": 43.336,
+     "end": 43.532,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "the",
+     "start": 43.532,
+     "end": 43.777,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "US,",
+     "start": 43.777,
+     "end": 44.022,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "it's",
+     "start": 44.022,
+     "end": 44.316,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "available",
+     "start": 44.316,
+     "end": 44.856,
+     "key": true,
+     "p": 7
+    },
+    {
+     "text": "now.",
+     "start": 44.856,
+     "end": 45.15,
+     "key": false,
+     "p": 7
+    },
+    {
+     "text": "Contact",
+     "start": 45.5,
+     "end": 45.943,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "Fast",
+     "start": 45.943,
+     "end": 46.238,
+     "key": true,
+     "p": 8
+    },
+    {
+     "text": "Shapes,",
+     "start": 46.238,
+     "end": 46.682,
+     "key": true,
+     "p": 8
+    },
+    {
+     "text": "and",
+     "start": 46.681,
+     "end": 46.928,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "we'll",
+     "start": 46.928,
+     "end": 47.272,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "take",
+     "start": 47.272,
+     "end": 47.568,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "care",
+     "start": 47.568,
+     "end": 47.863,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "of",
+     "start": 47.863,
+     "end": 48.06,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "you",
+     "start": 48.06,
+     "end": 48.306,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "with",
+     "start": 48.306,
+     "end": 48.601,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "Alucomaxx",
+     "start": 48.601,
+     "end": 49.143,
+     "key": true,
+     "p": 8
+    },
+    {
+     "text": "and",
+     "start": 49.143,
+     "end": 49.389,
+     "key": false,
+     "p": 8
+    },
+    {
+     "text": "DoorMaxx",
+     "start": 49.389,
+     "end": 49.881,
+     "key": true,
+     "p": 8
+    },
+    {
+     "text": "tech.",
+     "start": 49.881,
+     "end": 50.226,
+     "key": false,
+     "p": 8
+    }
+   ],
+   "fontSize": 70,
+   "y": 0.81,
+   "color": "#ffffff",
+   "highlight": "#ffb020",
+   "maxChars": 17,
+   "maxWords": 3
+  },
+  {
+   "id": "t1",
+   "name": "Título: local",
+   "type": "title",
+   "start": 0.4,
+   "duration": 3.0,
+   "text": "Hopedale, MA",
+   "tag": "on site",
+   "y": 0.1,
+   "fontSize": 110,
+   "color": "#ffffff",
+   "accent": "#ffb020",
+   "accentLast": true
+  },
+  {
+   "id": "s1",
+   "name": "Número: temperatura",
+   "type": "stat",
+   "start": 7.2,
+   "duration": 3.6,
+   "label": "At install",
+   "value": 14,
+   "suffix": "°C below zero",
+   "y": 0.1,
+   "color": "#ffffff",
+   "accent": "#ffb020"
+  }
+ ]
+}

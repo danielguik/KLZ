@@ -5,7 +5,16 @@
 - **Dublagem** PT→EN: Whisper → tradução por intenção (Claude) → voz (ElevenLabs com clonagem, ou OpenAI TTS) → ajuste de tempo → camadas de áudio.
 - **Render**: tudo vira um comando FFmpeg (`klz/render.py`).
 
-## Rodar
+## Studio (editor por camadas, estilo dos vídeos de referência)
+`studio/` é um projeto Remotion: timeline com camadas nomeadas, preview, painel de propriedades editável (cor, tempo, texto, legendas palavra a palavra, vidro, título, número animado, zoom, volume) e botão Render.
+```
+cd studio && npm install && npm start      # abre o Studio em http://localhost:3000
+# pipeline (Python): transcrever -> traduzir -> voz -> projeto
+python -m klz.make_project projects/<pasta> <nome> --voz dub      # gera studio/src/Root.tsx + assets em studio/public/
+```
+Edite no Studio e clique em Save: grava no `Root.tsx`. Render final: `npm run render`.
+
+## Rodar (versão antiga, FFmpeg)
 ```
 pip install -r requirements.txt   # + ffmpeg instalado
 export ANTHROPIC_API_KEY=... ELEVENLABS_API_KEY=... OPENAI_API_KEY=...

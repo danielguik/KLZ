@@ -2,55 +2,64 @@
  {
   "s": 0.0,
   "e": 3.5,
-  "pt": "A gente está aqui em Hopedale, em Massachusetts, Estados Unidos,",
-  "en": "We're here in Hopedale, Massachusetts, in the United States,"
+  "pt": "Estamos aqui em Hopedale, Massachusetts, nos Estados Unidos,",
+  "en": "We're here in Hopedale, Massachusetts, in the US,",
+  "say": "We're here in Hopedale, Massachusetts, in the US,"
  },
  {
   "s": 3.8,
   "e": 7.0,
   "pt": "para conferir como ficou essa porta da linha Império,",
-  "en": "to check out how this Império line door turned out,"
+  "en": "to see how this Império line door turned out,",
+  "say": "to see how this Império line door turned out,"
  },
  {
   "s": 7.0,
   "e": 11.1,
-  "pt": "porque quando a gente instalou, estava a menos 14, a neve estava aqui assim, ó, tudo branco.",
-  "en": "when we installed it, it was minus 14 Celsius, and snow was everywhere."
+  "pt": "porque quando a gente instalou estava a menos 14, a neve estava aqui assim, tudo branco.",
+  "en": "When we installed it: minus 14 Celsius, snow everywhere, all white.",
+  "say": "When we installed it: minus 14 Celsius, snow everywhere, all white."
  },
  {
-  "s": 10.8,
+  "s": 11.2,
   "e": 12.6,
   "pt": "Agora está esse solzão, esse dia lindo.",
-  "en": "Now it's sunny, beautiful day."
+  "en": "Now, what a sunny day!",
+  "say": "Now, what a sunny day!"
  },
  {
-  "s": 13.0,
+  "s": 12.7,
   "e": 15.2,
   "pt": "Tô aqui com o Rafael, da Fast Shapes, vendo como é que ficou.",
-  "en": "I'm here with Rafael from Fast Shapes, seeing how it turned out."
+  "en": "With Rafael from Fast Shapes, checking it out.",
+  "say": "With Rafael from Fast Shapes, checking it out."
  },
  {
   "s": 21.6,
   "e": 27.4,
   "pt": "O proprietário dessa casa optou por um puxador cava embutido com sistema de LED e também um puxador eletrônico,",
-  "en": "The owner of this house chose a recessed pull handle with an LED system, and also an electronic handle,"
+  "en": "The homeowner chose a recessed pull handle with LED lighting, and an electronic handle,",
+  "say": "The homeowner chose a recessed pull handle with LED lighting, and an electronic handle,"
  },
  {
   "s": 27.6,
   "e": 38.6,
-  "pt": "mais um item de exclusividade da DoorMaxx, esse puxador, que além de minimalista e lindo, tem um LED com sensor de presença quando você chega perto, e todas as tecnologias de desbloqueio mais modernas da atualidade.",
-  "en": "Another Doormax exclusive. This handle, which is not only minimalist and beautiful, has an LED with a presence sensor when you walk up, and all the most modern unlocking technology out there."
+  "pt": "mais um item de exclusividade da DoorMaxx, esse puxador que, além de minimalista e lindo, tem um LED com sensor de presença quando você chega perto e todas as tecnologias de desbloqueio mais modernas da atualidade.",
+  "en": "Another Doormaxx exclusive: this handle, minimalist and beautiful, with an LED presence sensor as you approach, plus the latest unlocking technology.",
+  "say": "Another Doormax exclusive: this handle, minimalist and beautiful, with an LED presence sensor as you approach, plus the latest unlocking technology."
  },
  {
   "s": 42.6,
   "e": 45.4,
   "pt": "Então, se você mora nos Estados Unidos, já está disponível.",
-  "en": "If you're in the US, it's available now."
+  "en": "If you live in the US, it's available now.",
+  "say": "If you live in the US, it's available now."
  },
  {
   "s": 45.5,
   "e": 50.4,
   "pt": "Contate a Fast Shapes, que a gente vai te atender com toda a tecnologia padrão Alucomaxx e DoorMaxx.",
-  "en": "Contact Fast Shapes, and we'll take care of you with all the standard Alucomax and Doormax technology."
+  "en": "Contact Fast Shapes, and we'll take care of you with Alucomaxx and DoorMaxx tech.",
+  "say": "Contact Fast Shapes, and we'll take care of you with Alucomax and Doormax tech."
  }
 ]

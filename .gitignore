@@ -3,3 +3,6 @@ projects/*/dub/
 projects/*/*.mp4
 __pycache__/
 projects/*/*.wav
+studio/node_modules/
+studio/out/
+studio/public/

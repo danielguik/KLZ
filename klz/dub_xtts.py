@@ -24,11 +24,11 @@ def main(proj, src, ref_spans):
     for i, p in enumerate(ph):
         nxt = ph[i+1]["s"] if i+1 < len(ph) else p["e"] + 3
         slot = max(nxt - p["s"] - 0.05, p["e"] - p["s"])
-        h = hashlib.md5(f"{p['en']}|{round(slot,1)}".encode()).hexdigest()[:10]; raw = str(out / f"{h}.wav"); speed = 1.0
+        h = hashlib.md5(f"{p.get('say', p['en'])}|{round(slot,1)}".encode()).hexdigest()[:10]; raw = str(out / f"{h}.wav"); speed = 1.0
         if os.path.exists(raw) and (out / f"{h}.json").exists():
             c = json.load(open(out / f"{h}.json")); info.append({**c, "i": i, "file": f"{h}.wav", "s": p["s"], "slot": slot, "en": p["en"]}); print(i, "cache", flush=True); continue
         for _ in range(3):
-            tts.tts_to_file(text=p["en"], speaker_wav=str(out / "ref.wav"), language="en", file_path=raw, speed=speed, temperature=0.6)
+            tts.tts_to_file(text=p.get("say", p["en"]), speaker_wav=str(out / "ref.wav"), language="en", file_path=raw, speed=speed, temperature=0.6)
             d = dur(raw)
             if d <= slot * 1.03: break
             speed = min(speed * d / slot, 1.35)
