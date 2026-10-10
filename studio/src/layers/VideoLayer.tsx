@@ -19,7 +19,7 @@ export const VideoLayer: React.FC<{l: V}> = ({l}) => {
   }
   return (
     <AbsoluteFill style={{transform: `scale(${scale})`, filter: `brightness(${l.brightness}) contrast(${l.contrast}) saturate(${l.saturate})`}}>
-      <OffthreadVideo src={url(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume}
+      <OffthreadVideo onError={() => undefined} src={url(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume}
         style={{width: '100%', height: '100%', objectFit: 'cover'}} />
     </AbsoluteFill>
   );

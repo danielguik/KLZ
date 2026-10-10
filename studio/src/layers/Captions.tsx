@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {LayerT} from '../schema';
+import {FONT} from './anim';
 
 type C = Extract<LayerT, {type: 'captions'}>;
 type W = C['words'][number];
@@ -30,15 +31,16 @@ export const Captions: React.FC<{l: C}> = ({l}) => {
   return (
     <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center'}}>
       <div style={{position: 'absolute', top: l.y * height, transform: 'translateY(-50%)', width: '92%', textAlign: 'center',
-        fontFamily: 'Inter, Helvetica, Arial, sans-serif', fontWeight: 800, fontSize: l.fontSize, lineHeight: 1.1,
-        textShadow: '0 4px 18px rgba(0,0,0,0.55)', letterSpacing: -1}}>
+        fontFamily: FONT, fontWeight: 800, fontSize: l.fontSize, lineHeight: 1.1,
+        textShadow: l.variant === 'outline' ? 'none' : '0 4px 18px rgba(0,0,0,0.55)', WebkitTextStroke: l.variant === 'outline' ? `${Math.max(4, l.fontSize * 0.09)}px #000` : undefined, paintOrder: 'stroke fill', letterSpacing: -1}}>
         {g.map((w, i) => {
           const spoken = t >= w.start;
           const pop = spoken ? spring({frame: frame - Math.round(w.start * fps), fps, config: {damping: 12, stiffness: 220, mass: 0.6}}) : 0;
           const isCur = spoken && t < w.end;
           const color = w.key && spoken ? l.highlight : l.color;
           return (
-            <span key={i} style={{display: 'inline-block', margin: '0 0.16em', color, opacity: spoken ? 1 : 0.32,
+            <span key={i} style={{display: 'inline-block', margin: '0 0.16em', color: l.variant === 'box' && isCur ? '#10101a' : color, opacity: spoken ? 1 : 0.32,
+              padding: l.variant === 'box' ? '0.04em 0.28em' : undefined, borderRadius: '0.3em', background: l.variant === 'box' && isCur ? l.highlight : 'transparent',
               transform: `scale(${spoken ? 0.82 + 0.18 * pop + (isCur ? 0.06 : 0) : 1})`}}>
               {w.text}
             </span>

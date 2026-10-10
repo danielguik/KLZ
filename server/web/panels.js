@@ -1,7 +1,7 @@
 "use strict";
 /* Painéis da direita: Camada | Frases | Vozes | Lip-sync | Áudio | Saída */
 let TAB='frases';let CAPS={};let JOBS=[];
-const TABS=[['camada','Camada'],['frases','Frases'],['vozes','Vozes'],['lipsync','Lip-sync'],['audio','Áudio'],['saida','Saída']];
+const TABS=[['camada','Camada'],['frases','Frases'],['vozes','Vozes'],['lipsync','Lip-sync'],['estilo','Estilo'],['audio','Áudio'],['saida','Saída']];
 const stale=()=>(PROJ&&PROJ.stale)||[];
 const spk=id=>(PROJ.speakers||[]).find(s=>s.id===id);
 const voiceOf=sid=>{const s=spk(sid);return s&&(PROJ.voices||[]).find(v=>v.id===s.voice)};
@@ -15,7 +15,7 @@ function renderTabs(){
 function renderTab(){
   renderTabs();const b=$('#tabbody');
   if(!PROJ){b.innerHTML='<div class="hint">Crie um projeto (+ Novo) para começar.</div>';return}
-  ({camada:tabCamada,frases:tabFrases,vozes:tabVozes,lipsync:tabLipsync,audio:tabAudio,saida:tabSaida})[TAB](b);
+  ({camada:tabCamada,frases:tabFrases,vozes:tabVozes,lipsync:tabLipsync,estilo:tabEstilo,audio:tabAudio,saida:tabSaida})[TAB](b);
   if(S.hook.lsbox)S.hook.lsbox();
 }
 async function flushSave(){clearTimeout(saveTimer);if(!PROJ)return;await api(`/api/projects/${PROJ.id}/layers`,{method:'PUT',json:{layers:PROJ.layers,durationSec:PROJ.durationSec,mix:PROJ.mix,cover_old_subs:PROJ.cover_old_subs,pronounce:PROJ.pronounce}}).catch(()=>{})}
@@ -30,15 +30,27 @@ const FIELDS={
  common:[['name','text','Nome'],['start','num','Início (s)',0,900,.05],['duration','num','Duração (s)',.1,900,.05]],
  video:[['trimStart','num','Cortar início (s)',0,900,.05],['volume','range','Volume',0,1,.05],['brightness','range','Brilho',0,2,.05],['contrast','range','Contraste',0,2,.05],['saturate','range','Saturação',0,2,.05]],
  audio:[['volume','range','Volume',0,1.5,.05],['rate','range','Velocidade',.5,2,.01],['trimStart','num','Cortar início (s)',0,60,.05]],
- captions:[['fontSize','num','Tamanho',20,160,1],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['highlight','color','Cor de destaque'],['maxChars','num','Máx. caracteres por linha',6,40,1],['maxWords','num','Máx. palavras por linha',1,8,1]],
+ captions:[['variant','select','Estilo',['pop','box','outline']],['fontSize','num','Tamanho',20,160,1],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['highlight','color','Cor de destaque'],['maxChars','num','Máx. caracteres por linha',6,40,1],['maxWords','num','Máx. palavras por linha',1,8,1]],
  glass:[['x','range','Posição X',0,1,.01],['y','range','Posição Y',0,1,.01],['w','range','Largura',0,1,.01],['h','range','Altura',0,1,.01],['radius','num','Arredondamento',0,200,1],['blur','range','Desfoque',0,80,1],['tint','color','Cor da película'],['borderColor','color','Cor da borda'],['enter','bool','Animação de entrada']],
  title:[['text','text','Texto'],['tag','text','Etiqueta (opcional)'],['y','range','Posição vertical',0,1,.01],['fontSize','num','Tamanho',20,260,1],['color','color','Cor'],['accent','color','Cor de destaque'],['accentLast','bool','Última palavra em destaque']],
  stat:[['label','text','Rótulo'],['value','num','Valor',-9999,9999,1],['suffix','text','Sufixo'],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['accent','color','Cor de destaque']],
  floatingWords:[['words','list','Palavras (uma por linha)'],['color','color','Cor'],['fontSize','num','Tamanho',20,160,1]],
- flash:[['color','color','Cor']]
+ flash:[['color','color','Cor']],
+ background:[['style','select','Estilo',['aurora','mesh','solid']],['c1','color','Cor base'],['c2','color','Cor 2'],['c3','color','Cor 3'],['speed','range','Velocidade',0,4,.05],['grain','range','Granulado de filme',0,1,.01],['vignette','range','Vinheta',0,1,.01]],
+ videoCard:[['x','range','Posição X',0,1,.01],['y','range','Posição Y',0,1,.01],['w','range','Largura',.1,1,.01],['h','range','Altura',.1,1,.01],['shape','select','Formato',['rounded','circle']],['radius','num','Arredondamento',0,200,1],['zoom','range','Recorte: zoom',1,4,.01],['focusX','range','Recorte: foco X',0,1,.01],['focusY','range','Recorte: foco Y',0,1,.01],['borderColor','color','Cor da borda'],['borderWidth','num','Espessura da borda',0,20,1],['glow','color','Brilho'],['enter','select','Entrada',['pop','rise','slide','fade','none']],['trimStart','num','Cortar início (s)',0,900,.05],['volume','range','Volume',0,1,.05]],
+ kinetic:[['words','list','Palavras / frases (uma por linha)'],['mode','select','Modo',['stack','marquee','cascade']],['fontSize','num','Tamanho',40,320,1],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['accent','color','Cor de destaque'],['outline','bool','Só contorno'],['speed','range','Velocidade',.2,4,.05],['rotate','range','Inclinação',-30,30,1],['opacity','range','Opacidade',0,1,.01]],
+ barchart:[['title','text','Título'],['items','items','Itens (um por linha: rótulo | valor)'],['y','range','Posição vertical',0,1,.01],['w','range','Largura',.3,1,.01],['accent','color','Cor de destaque'],['unit','text','Unidade']],
+ ring:[['value','range','Valor',0,100,1],['label','text','Rótulo'],['unit','text','Unidade'],['y','range','Posição vertical',0,1,.01],['size','num','Tamanho',200,800,10],['color','color','Cor']],
+ lowerthird:[['name','text','Nome'],['role','text','Cargo / empresa'],['y','range','Posição vertical',0,1,.01],['side','select','Lado',['left','right']],['color','color','Cor do nome'],['accent','color','Cor de destaque']],
+ callout:[['text','text','Texto'],['tx','range','Alvo X',0,1,.01],['ty','range','Alvo Y',0,1,.01],['lx','range','Rótulo X',0,1,.01],['ly','range','Rótulo Y',0,1,.01],['color','color','Cor'],['delay','num','Atraso (s)',0,10,.05]],
+ grid3d:[['color','color','Cor'],['speed','range','Velocidade',0,4,.05],['horizon','range','Horizonte',0,1,.01],['opacity','range','Opacidade',0,1,.01]],
+ shape:[['kind','select','Forma',['rect','circle','line']],['x','range','X',0,1,.01],['y','range','Y',0,1,.01],['w','range','Largura',0,1,.01],['h','range','Altura',0,1,.01],['fill','color','Preenchimento'],['stroke','color','Contorno'],['strokeWidth','num','Espessura',0,30,1],['radius','num','Arredondamento',0,200,1],['anim','select','Animação',['draw','pulse','none']]],
+ transition:[['kind','select','Tipo',['wipe','bars','iris','glitch','flash','fadeblack']],['color','color','Cor 1'],['color2','color','Cor 2']]
 };
 const isHex=c=>/^#[0-9a-f]{6}$/i.test(c||'');
 function field(l,f){const[k,type,label,mn,mx,st]=f,v=l[k];
+  if(type==='select')return`<div class="fld"><label>${label}</label><select data-k="${k}">${mn.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
+  if(type==='items')return`<div class="fld"><label>${label}</label><textarea data-k="${k}" data-items="1" rows="5">${esc((v||[]).map(i=>i.label+' | '+i.value).join('\n'))}</textarea></div>`;
   if(type==='bool')return`<label class="chk"><input type="checkbox" data-k="${k}" ${v?'checked':''}> ${label}</label>`;
   if(type==='range')return`<div class="fld"><label>${label}<output>${(+v).toFixed(2)}</output></label><input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${v}"></div>`;
   if(type==='num')return`<div class="fld"><label>${label}</label><input type="number" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${v}"></div>`;
@@ -50,12 +62,12 @@ function tabCamada(b){
   if(!l){b.innerHTML='<div class="hint">Clique numa camada (lista ou timeline) para editar. As mudanças aparecem na hora no preview e são salvas sozinhas.</div>';return}
   let h=`<div class="btnrow"><button data-act="up">↑ Subir</button><button data-act="down">↓ Descer</button><button data-act="dup">Duplicar</button><button data-act="del" class="danger">Excluir</button></div>`;
   if(l.auto)h+='<div class="hint">Camada automática: as suas edições aqui são mantidas ao refazer vozes. Textos e vozes se editam na aba Frases.</div>';
-  h+=FIELDS.common.map(f=>field(l,f)).join('')+(FIELDS[l.type]||[]).map(f=>field(l,f)).join('');
+  h+=FIELDS.common.filter(f=>!(f[0]==='name'&&l.type==='lowerthird')).map(f=>field(l,f)).join('')+(FIELDS[l.type]||[]).map(f=>field(l,f)).join('');
   if(l.type==='video'){h+=`<div class="ph"><span>Zoom em momentos-chave</span><button class="sm" data-act="addzp">+ Zoom</button></div>`;
     h+=(l.zoomPunches||[]).map((z,i)=>`<div class="zp"><div><small>em (s)</small><input type="number" step="0.05" data-zp="${i}" data-f="at" value="${z.at}"></div><div><small>escala</small><input type="number" step="0.01" min="1" max="2" data-zp="${i}" data-f="scale" value="${z.scale}"></div><div><small>duração</small><input type="number" step="0.05" data-zp="${i}" data-f="hold" value="${z.hold}"></div><button data-delzp="${i}" class="danger sm">✕</button></div>`).join('')||'<div class="hint">Nenhum zoom. Adicione para dar ênfase.</div>'}
   b.innerHTML=h;
   b.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;el.addEventListener('input',()=>{let v;
-    if(el.type==='checkbox')v=el.checked;else if(el.type==='range'||el.type==='number')v=+el.value;else if(el.dataset.list)v=el.value.split('\n').map(s=>s.trim()).filter(Boolean);else v=el.value;
+    if(el.type==='checkbox')v=el.checked;else if(el.type==='range'||el.type==='number')v=+el.value;else if(el.dataset.list)v=el.value.split('\n').map(s=>s.trim()).filter(Boolean);else if(el.dataset.items)v=el.value.split('\n').map(s=>s.split('|')).filter(a=>a[0].trim()).map(a=>({label:a[0].trim(),value:+(a[1]||0),color:''}));else v=el.value;
     l[k]=v;if(k==='start'||k==='duration')recalcDur();saveLayersSoon();const o=el.parentElement.querySelector('output');if(o)o.textContent=(+v).toFixed(2);
     if(k==='name'||k==='start'||k==='duration'){renderLayers();renderTimeline()}const cc=b.querySelector(`[data-kc="${k}"]`);if(cc&&isHex(v))cc.value=v})});
   b.querySelectorAll('[data-kc]').forEach(el=>el.addEventListener('input',()=>{const k=el.dataset.kc;l[k]=el.value;const t=b.querySelector(`[data-k="${k}"]`);if(t)t.value=el.value;saveLayersSoon()}));
@@ -72,9 +84,21 @@ const NEW={title:()=>({type:'title',name:'Título',duration:3,text:'Novo título
  stat:()=>({type:'stat',name:'Número',duration:3.6,label:'Rótulo',value:50,suffix:'%',y:.1,color:'#ffffff',accent:'#ffb020'}),
  glass:()=>({type:'glass',name:'Vidro',duration:4,enter:true,x:.1,y:.4,w:.8,h:.15,radius:36,blur:28,tint:'rgba(10,10,14,0.45)',borderColor:'rgba(255,255,255,0.45)'}),
  floatingWords:()=>({type:'floatingWords',name:'Palavras flutuantes',duration:4,words:['palavra','chave','destaque'],color:'#ffffff',fontSize:54}),
+ background:()=>({type:'background',name:'Fundo animado',duration:Math.max(2,dur()),style:'aurora',c1:'#0b0b14',c2:'#5b2bd9',c3:'#ff6a3d',speed:1,grain:.18,vignette:.55}),
+ videoCard:()=>{const v=LAY().find(l=>l.type==='video');return{type:'videoCard',name:'Vídeo em cartão',duration:Math.max(2,dur()-S.t),src:v?v.src.split('?')[0]:'',trimStart:S.t,volume:0,x:.07,y:.3,w:.86,h:.5,shape:'rounded',radius:56,borderColor:'rgba(255,255,255,0.4)',borderWidth:3,glow:'rgba(124,92,255,0.5)',zoom:1,focusX:.5,focusY:.5,enter:'rise'}},
+ kinetic:()=>({type:'kinetic',name:'Texto cinético',duration:4,mode:'stack',words:['PALAVRA','EM','DESTAQUE'],fontSize:150,y:.3,color:'#ffffff',accent:'#ffb020',outline:false,speed:1,rotate:-6,opacity:1}),
+ barchart:()=>({type:'barchart',name:'Gráfico de barras',duration:5,title:'Comparativo',items:[{label:'Antes',value:40,color:''},{label:'Depois',value:90,color:''}],y:.16,w:.84,accent:'#ffb020',unit:'%'}),
+ ring:()=>({type:'ring',name:'Anel',duration:4.5,value:75,label:'resultado',y:.2,size:440,color:'#ffb020',unit:'%'}),
+ lowerthird:()=>({type:'lowerthird',name:'Nome da pessoa',duration:5,role:'Cargo ou empresa',y:.78,side:'left',color:'#ffffff',accent:'#ffb020'}),
+ callout:()=>({type:'callout',name:'Seta/legenda',duration:4,text:'Detalhe importante',tx:.5,ty:.5,lx:.72,ly:.3,color:'#ffb020',delay:0}),
+ grid3d:()=>({type:'grid3d',name:'Grade 3D',duration:Math.max(2,dur()),color:'#7c5cff',speed:1,horizon:.62,opacity:.8}),
+ shape:()=>({type:'shape',name:'Forma',duration:4,kind:'rect',x:.1,y:.6,w:.8,h:.14,fill:'rgba(255,255,255,0.08)',stroke:'#ffb020',strokeWidth:4,radius:40,anim:'draw'}),
+ transition:()=>({type:'transition',name:'Transição',duration:.9,kind:'wipe',color:'#7c5cff',color2:'#ffb020'}),
  flash:()=>({type:'flash',name:'Flash',duration:.4,color:'#ffffff'})};
-function buildAdd(){const m=$('#addmenu');m.innerHTML=Object.keys(NEW).map(k=>`<button data-add="${k}">${TYPES[k]}</button>`).join('');
-  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{if(!PROJ)return toast('Abra um projeto primeiro.');const l={id:rid(),auto:false,start:+S.t.toFixed(2),...NEW[b.dataset.add]()};PROJ.layers.push(l);recalcDur();S.sel=l.id;saveLayersSoon();TAB='camada';renderAll()})}
+const GROUPS=[['Texto e gráficos',['title','stat','kinetic','barchart','ring','lowerthird','callout']],['Vídeo e fundo',['videoCard','background','grid3d','glass','shape']],['Movimento',['floatingWords','transition','flash']]];
+function buildAdd(){const m=$('#addmenu');m.innerHTML=GROUPS.map(([g,ks])=>`<div class="grp">${g}</div>`+ks.map(k=>`<button data-add="${k}">${TYPES[k]}</button>`).join('')).join('');
+  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{if(!PROJ)return toast('Abra um projeto primeiro.');const o=NEW[b.dataset.add]();const l={id:rid(),auto:false,start:+S.t.toFixed(2),...o};
+    PROJ.layers.push(l);recalcDur();S.sel=l.id;saveLayersSoon();TAB='camada';renderAll()})}
 
 /* ---------- Frases ---------- */
 function statusOf(ph){
@@ -187,6 +211,19 @@ S.hook.lsbox=()=>{
     box.addEventListener('pointermove',mv);box.addEventListener('pointerup',up)};
   box.onpointerdown=drag('move');box.querySelector('i').onpointerdown=drag('size');
 };
+
+/* ---------- Estilo ---------- */
+function tabEstilo(b){
+  b.innerHTML=`<div class="hint">Aplica de uma vez um visual profissional (como nos vídeos de referência): fundo animado, letreiro rolando, o vídeo recortado em cartão com brilho, título, legendas em caixa e transições automáticas nos cortes de cena. Tudo vira camadas que você pode mexer depois.</div>
+   <div class="card"><h4>Visual</h4>
+   <select id="stP"><option value="card">Cartão sobre fundo animado (estilo reels)</option><option value="full">Tela cheia limpa (só título e legendas)</option></select>
+   <input type="text" id="stT" placeholder="Título (ex.: Hopedale, MA)"><input type="text" id="stG" placeholder="Etiqueta pequena (ex.: on site)">
+   <input type="text" id="stW" placeholder="Palavras do letreiro, separadas por vírgula (ex.: DOORMAXX, PIVOT DOOR)">
+   <input type="number" id="stE" step="0.1" placeholder="Terminar o visual em (s) — vazio = até o fim (depois aparece o vídeo original em tela cheia, ex.: logo final)">
+   <button class="primary" id="stGo" ${busy()?'disabled':''}>Aplicar visual profissional</button></div>
+   <div class="hint">As camadas de visual ficam marcadas e são trocadas se você aplicar de novo. As camadas que você criou à mão não são alteradas. Para cada camada nova (gráfico, seta, texto, anel…), use o menu <b>Adicionar</b> à esquerda.</div>`;
+  $('#stGo').onclick=()=>startJob(`/api/projects/${PROJ.id}/style`,{preset:$('#stP').value,title:$('#stT').value,tag:$('#stG').value,words:$('#stW').value.split(',').map(x=>x.trim()).filter(Boolean),end:$('#stE').value?+$('#stE').value:null});
+}
 
 /* ---------- Áudio ---------- */
 function tabAudio(b){

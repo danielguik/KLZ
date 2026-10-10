@@ -5,13 +5,17 @@
   "scripts": {
     "start": "remotion studio",
     "render": "remotion render src/index.ts Reel out/reel.mp4",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "build:player": "node build-player.mjs"
   },
   "dependencies": {
+    "@fontsource/manrope": "^5.3.0",
     "@remotion/cli": "4.0.534",
     "@remotion/media-utils": "4.0.534",
+    "@remotion/player": "^4.0.534",
     "@remotion/transitions": "4.0.534",
     "@remotion/zod-types": "4.0.534",
+    "esbuild": "^0.28.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "remotion": "4.0.534",
@@ -19,6 +23,7 @@
   },
   "devDependencies": {
     "@types/react": "18.3.3",
+    "@types/react-dom": "^18.3.0",
     "typescript": "5.5.4"
   }
 }

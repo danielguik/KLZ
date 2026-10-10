@@ -144,8 +144,9 @@ def compile_layers(proj):
             L.append({"id": f"a_{ph['id']}", "auto": True, "phrase": ph["id"], "name": f"{ph['id']} · {ph['speaker']}: {ph['en'][:26]}", "type": "audio",
                       "start": ph["t0"], "duration": round(ph["dur"] / ph.get("rate", 1) + 0.05, 2), "src": a, "trimStart": 0,
                       "volume": proj["mix"]["voice"], "rate": ph.get("rate", 1)})
-    L.append(captions_layer(proj))
-    proj["layers"] = L + keep
+    for u in keep:
+        if u.get("link") == "base" and "src" in u: u["src"] = base  # cartão de vídeo sempre acompanha o vídeo com lip-sync
+    proj["layers"] = L + keep + [captions_layer(proj)]
 
 def phrase_words(ph, idx):
     toks = (ph.get("en") or "").split()
@@ -387,6 +388,52 @@ def compose_base(pid):
     lipsync.compose(d / proj["media"], proj["lipsync"]["spans"], d / "media" / "base.mp4")
     def fn(p): refresh_phrase_layers(p)
     store.update(pid, fn)
+
+# ---------------------------------------------------------------- estilo visual
+def detect_cuts(video, thr=0.35):
+    r = subprocess.run(["ffmpeg", "-i", str(video), "-vf", f"select='gt(scene,{thr})',showinfo", "-f", "null", "-"], capture_output=True, text=True).stderr
+    return [float(m) for m in re.findall(r"pts_time:([0-9.]+)", r)]
+
+def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambda m: None, end=None):
+    """Aplica um visual profissional: fundo animado + letreiro + vídeo em cartão + título + legendas abaixo + transições nos cortes.
+    As camadas criadas ficam marcadas (preset) e são substituídas ao aplicar de novo; as suas camadas não são tocadas."""
+    proj = store.load(pid); d = P(pid); media = d / proj["media"]; D = proj["durationSec"]
+    progress("Achando os cortes de cena…")
+    E = min(float(end), D) if end else D          # o visual termina em E; depois aparece o vídeo original em tela cheia (ex.: logo final)
+    raw = [c for c in detect_cuts(media, 0.45) if 1.0 < c < E - 1.0]
+    cuts = []                                      # só mudanças grandes de cena, bem espaçadas (cortes rápidos ficam como estão)
+    for c in raw:
+        if not cuts or c - cuts[-1] >= 5.0: cuts.append(c)
+    cuts = cuts[:5]
+    def mk(**k):
+        k.update({"id": "s_" + uuid_hex(), "preset": preset, "auto": False}); return k
+    S = []
+    if preset == "card":
+        ws = [w.strip() for w in (words or []) if w.strip()] or ([title] if title else [proj.get("name", "KLZ")])
+        S += [mk(name="Fundo animado", type="background", start=0, duration=E, style="aurora", c1="#0a0a14", c2="#5b2bd9", c3="#ff6a3d", speed=1, grain=0.2, vignette=0.6),
+              mk(name="Letreiro", type="kinetic", start=0, duration=E, mode="marquee", words=ws, fontSize=170, y=0.42, color="#ffffff", accent="#ffb020", outline=True, speed=1, rotate=-8, opacity=0.14),
+              mk(name="Vídeo em cartão", type="videoCard", link="base", src=proj["media"], start=0, duration=E, trimStart=0, volume=0, x=0.06, y=0.26, w=0.88, h=0.56,
+                 shape="rounded", radius=56, borderColor="rgba(255,255,255,0.4)", borderWidth=3, glow="rgba(124,92,255,0.5)", zoom=1, focusX=0.5, focusY=0.32, enter="rise")]
+    if title:
+        S.append(mk(name="Título", type="title", start=0.4, duration=min(4.0, D), text=title, tag=tag, y=0.07 if preset == "card" else 0.1, fontSize=108, color="#ffffff", accent="#ffb020", accentLast=True))
+    for i, c in enumerate(cuts[:8]):
+        S.append(mk(name=f"Transição {i + 1}", type="transition", start=round(max(0, c - 0.45), 2), duration=0.9, kind=["wipe", "bars"][i % 2], color="#7c5cff", color2="#ffb020"))
+    if E < D - 0.5:
+        S.append(mk(name="Transição final", type="transition", start=round(max(0, E - 0.45), 2), duration=0.9, kind="wipe", color="#7c5cff", color2="#ffb020"))
+    def fn(p):
+        old = [l for l in p["layers"] if not l.get("preset")]
+        for l in old:
+            if l.get("id") == "cap":
+                l.update({"y": 0.9, "variant": "box", "fontSize": 66} if preset == "card" else {"y": 0.81, "variant": "pop", "fontSize": 70})
+        p["cover_old_subs"] = preset != "card"
+        auto = [l for l in old if l.get("auto")]; user = [l for l in old if not l.get("auto")]
+        p["layers"] = auto + S + user
+        compile_layers(p)
+    store.update(pid, fn)
+    return {"layers": len(S), "cuts": len(cuts)}
+
+def uuid_hex():
+    import uuid; return uuid.uuid4().hex[:6]
 
 # ---------------------------------------------------------------- render
 def render(pid, scale=0.75, crf=18, base_url="http://127.0.0.1:8000", token="", progress=lambda m: None):

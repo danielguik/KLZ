@@ -218,6 +218,18 @@ def ls_run(pid: str, b: Ids):
 def ls_compose(pid: str):
     proj_or_404(pid); return jobs.submit("compose", pid, lambda pr: pipeline.compose_base(pid), "Recompor vídeo com lip-sync")
 
+class StyleReq(BaseModel):
+    preset: str = "card"
+    title: str = ""
+    tag: str = ""
+    words: list[str] | None = None
+    end: float | None = None
+
+@app.post("/api/projects/{pid}/style", dependencies=[Depends(auth)])
+def apply_style_route(pid: str, b: StyleReq):
+    proj_or_404(pid)
+    return jobs.submit("style", pid, lambda pr: pipeline.apply_style(pid, b.preset, b.title, b.tag, b.words, pr, b.end), "Aplicar visual profissional")
+
 class RenderReq(BaseModel):
     scale: float = 0.75
     crf: int = 18

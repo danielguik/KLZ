@@ -1,5 +1,5 @@
 :root{--bg:#0d0e12;--panel:#15171d;--panel2:#1c1f27;--line:#2a2e39;--fg:#e9ebf1;--dim:#8c92a4;--accent:#ffb020;--accent-ink:#1b1300;--danger:#ff6b6b;--ok:#4cc38a;--warn:#ffb020;
---c-video:#3d6fd9;--c-audio:#2fa070;--c-captions:#a45fd0;--c-glass:#5b84a8;--c-title:#e07a3c;--c-stat:#d4a02a;--c-floatingWords:#c15f8f;--c-flash:#8c92a4;
+--c-video:#3d6fd9;--c-audio:#2fa070;--c-captions:#a45fd0;--c-glass:#5b84a8;--c-title:#e07a3c;--c-stat:#d4a02a;--c-floatingWords:#c15f8f;--c-flash:#8c92a4;--c-background:#4b3fa0;--c-videoCard:#2d7fd0;--c-kinetic:#d85c8a;--c-barchart:#c9962a;--c-ring:#2aa7a0;--c-lowerthird:#8a6fe0;--c-callout:#e0a02e;--c-grid3d:#5a56c8;--c-shape:#6b7a8c;--c-transition:#c0504d;
 --ui:'DM Sans',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;color-scheme:dark}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{height:100%;margin:0}
@@ -24,7 +24,7 @@ input[type=color]{width:34px;height:30px;padding:0;border:1px solid var(--line);
 .view{grid-area:view;display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
 .stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#050507;border:1px solid var(--line);border-radius:12px;padding:8px}
 .cvwrap{position:relative;height:100%;aspect-ratio:9/16;max-width:100%}
-canvas#cv{width:100%;height:100%;background:#000;border-radius:6px;display:block}
+#pl{position:absolute;inset:0;background:#000;border-radius:6px;overflow:hidden}
 #lsbox{position:absolute;border:2px solid var(--accent);background:rgba(255,176,32,.12);cursor:move;border-radius:4px}
 #lsbox i{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;background:var(--accent);border-radius:3px;cursor:nwse-resize}
 .transport{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
@@ -73,3 +73,4 @@ a.dl{color:var(--accent)}
   .view{height:72vh}.tl{height:240px}.insp{max-height:none;overflow:visible}.layers{max-height:50vh}
 }
 details.ptbox summary{cursor:pointer;list-style:none}details.ptbox summary::before{content:"▸ ";color:var(--dim)}details.ptbox[open] summary::before{content:"▾ "}
+.grp{grid-column:1/-1;margin-top:6px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}

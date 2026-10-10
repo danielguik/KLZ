@@ -4,6 +4,7 @@
 <title>KLZ Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&family=Manrope:wght@700;800&display=swap">
+<link rel="stylesheet" href="player.css">
 <link rel="stylesheet" href="app.css">
 </head><body>
 <div class="app">
@@ -21,7 +22,7 @@
     <div class="ph"><span>Adicionar</span></div><div class="add" id="addmenu"></div></section>
 
   <section class="view">
-    <div class="stage"><div class="cvwrap"><canvas id="cv" width="540" height="960"></canvas><div id="lsbox" hidden></div></div></div>
+    <div class="stage"><div class="cvwrap"><div id="pl"></div><div id="lsbox" hidden></div></div></div>
     <div class="transport">
       <button id="bStart" title="Início">⏮</button>
       <button id="bPlay" class="primary" style="min-width:92px">▶ Tocar</button>
@@ -42,6 +43,7 @@
 </div>
 <div id="toast" class="toast" hidden></div>
 <div id="ovl" class="overlay" hidden></div>
+<script src="player.js"></script>
 <script src="engine.js"></script>
 <script src="panels.js"></script>
 <script src="app.js"></script>

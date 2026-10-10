@@ -47,16 +47,9 @@ def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0
     for spk in speakers:
         act = np.array([any(p["speaker"] == spk["id"] and p["s"] <= t <= p["e"] for p in phrases) for t in times], dtype=float)
         if act.sum() < 4 or not chains: continue
-        best, bs = None, -9
         pref = (prefer or {}).get(spk["id"])
-        if pref:  # rostos já ligados a esta pessoa pela identificação voz+boca: usa todos eles (a pessoa pode aparecer em vários planos)
-            merged = {}
-            for ci in pref:
-                if ci < len(chains):
-                    for i, f in chains[ci]["pts"].items(): merged.setdefault(i, f)
-            cand = [{"pts": merged}] if merged else []
-        else: cand = chains
-        for tr in cand:
+        cand = [chains[ci] for ci in pref if ci < len(chains)] if pref else chains
+        def score(tr):
             ap = np.full(n, np.nan)
             for i, f in tr["pts"].items(): ap[i] = f["mar"]
             mo = np.zeros(n); k = max(2, int(0.5 / st))
@@ -64,9 +57,18 @@ def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0
                 win = ap[max(0, i - k): i + k + 1]; win = win[~np.isnan(win)]
                 mo[i] = win.std() if len(win) >= 3 else 0.0
             m = ~np.isnan(ap)
-            if m.sum() < 6 or act[m].std() < 1e-6 or mo[m].std() < 1e-9: sc = -1 + 0.01 * m.sum() / n
-            else: sc = float(np.corrcoef(act[m], mo[m])[0, 1]) + 0.2 * (m.sum() / n)
-            if sc > bs: best, bs = tr, sc
+            if m.sum() < 6 or act[m].std() < 1e-6 or mo[m].std() < 1e-9: return -1 + 0.01 * m.sum() / n
+            return float(np.corrcoef(act[m], mo[m])[0, 1]) + 0.2 * (m.sum() / n)
+        scored = sorted(((score(tr), tr) for tr in cand), key=lambda x: -x[0])
+        if not scored: continue
+        bs, best = scored[0]
+        if pref:  # a mesma pessoa em outros planos: une trilhas que NÃO aparecem junto com a principal (rostos simultâneos são pessoas diferentes)
+            merged = dict(best["pts"])
+            for sc, tr in scored[1:]:
+                if sc < 0.0: continue
+                if len(set(tr["pts"]) & set(merged)) * st < 0.5:
+                    for i, f in tr["pts"].items(): merged.setdefault(i, f)
+            best = {"pts": merged}
         if best is None: continue
         pres = [i in best["pts"] for i in range(n)]
         i = 0; maxgap = int(0.8 / st)
