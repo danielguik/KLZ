@@ -10,7 +10,7 @@ def _t(s):  # ASS time h:mm:ss.cc
 def build_ass(words, w, h, keywords=(), font="DejaVu Sans", base=0.052, key_color="&H0040C8FF", y_frac=0.74, group=4):
     """words: [{'start','end','text'}]. Mostra grupos de `group` palavras; a palavra falada ganha 'pop' e
     as palavras-chave ficam maiores, coloridas e permanecem destacadas até o fim do grupo."""
-    fs, kfs = int(h * base), int(h * base * 1.35)
+    fs, kfs = int(h * base), int(h * base * 1.22)
     head = (f"[Script Info]\nScriptType: v4.00+\nPlayResX: {w}\nPlayResY: {h}\nWrapStyle: 2\n\n"
             f"[V4+ Styles]\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,"
             f"Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding\n"
