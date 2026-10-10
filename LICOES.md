@@ -22,3 +22,10 @@
 - Não entregar como "melhor versão" algo que eu mesmo vejo que não está bom: dizer o que falta antes.
 - App web (artifact): download só via capability `downloads` (Blob ok, mp4/webm/json). Exportar = MediaRecorder em tempo real (canvas.captureStream + AudioContext); preferir mp4 só com H.264. Testado: 64s -> 17 MB a 540p. Regra `[hidden]{display:none!important}` precisa estar no CSS do app.
 - Arrastar elemento da timeline: não re-renderizar a timeline no pointerdown (destrói o elemento com pointer capture).
+- Diarização: com vídeo ao ar livre a similaridade ECAPA entre trechos do MESMO falante fica ~0,4–0,5; limiar de distância 0,55 dividia 1 pessoa em 3. Usar trechos de ≥3–4 s, limiar ~0,85 e juntar grupos com mesmo f0 (±1,5 semitom). Sempre permitir "refazer identificação" com nº de falantes.
+- XTTS às vezes gera segundos de silêncio no início/pausas: cortar com silenceremove (start e stop_periods=-1, stop_silence 0,18 s) e medir a duração DEPOIS de cortar.
+- Frases em inglês passam do tempo: mostrar "longa demais (+X s)" na tela e deixar encurtar/juntar frases; velocidade >1,15–1,35 soa apressada.
+- Lip-sync: Wav2Lip em rosto de ~30 px = ruim. Recortar o rosto (256 px), processar só o recorte e colar com máscara suave (gblur) funciona melhor que processar o quadro inteiro. Desligar por padrão quando o rosto < 80 px.
+- Haar acha falsos rostos (pedras); validar com MediaPipe FaceMesh num recorte ampliado (e dá a abertura da boca). mediapipe novo (1.x) não tem `solutions`: fixar 0.10.14 e numpy<2.
+- Rastreamento: unir pedaços de trilha da mesma pessoa por posição (≤2 s de intervalo); senão cada pedaço vira uma "pessoa".
+- Shell: `pkill -f`/`pgrep -f` com o nome do script no próprio comando mata o shell (exit 144). Usar `ps -eo pid,args | awk '/padrão/ && !/awk/ {print $1}'` ou arquivo .pid.

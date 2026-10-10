@@ -2,6 +2,8 @@ import React from 'react';
 import {AbsoluteFill, Audio, OffthreadVideo, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {LayerT} from '../schema';
 
+const url = (s: string) => (/^https?:/.test(s) ? s : staticFile(s));
+
 type V = Extract<LayerT, {type: 'video'}>;
 
 export const VideoLayer: React.FC<{l: V}> = ({l}) => {
@@ -17,7 +19,7 @@ export const VideoLayer: React.FC<{l: V}> = ({l}) => {
   }
   return (
     <AbsoluteFill style={{transform: `scale(${scale})`, filter: `brightness(${l.brightness}) contrast(${l.contrast}) saturate(${l.saturate})`}}>
-      <OffthreadVideo src={staticFile(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume}
+      <OffthreadVideo src={url(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume}
         style={{width: '100%', height: '100%', objectFit: 'cover'}} />
     </AbsoluteFill>
   );
@@ -25,5 +27,5 @@ export const VideoLayer: React.FC<{l: V}> = ({l}) => {
 
 export const AudioLayer: React.FC<{l: Extract<LayerT, {type: 'audio'}>}> = ({l}) => {
   const {fps} = useVideoConfig();
-  return <Audio src={staticFile(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume} playbackRate={l.rate} />;
+  return <Audio src={url(l.src)} startFrom={Math.round(l.trimStart * fps)} volume={l.volume} playbackRate={l.rate} />;
 };

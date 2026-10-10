@@ -6,3 +6,5 @@ projects/*/*.wav
 studio/node_modules/
 studio/out/
 studio/public/door/original.mp4
+server/data/
+server/third_party/

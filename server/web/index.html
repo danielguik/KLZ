@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KLZ Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&family=Manrope:wght@700;800&display=swap">
+<link rel="stylesheet" href="app.css">
+</head><body>
+<div class="app">
+  <header class="top">
+    <span class="brand">KLZ <b>Studio</b></span>
+    <select id="selProj" title="Projeto"></select>
+    <button id="bNew">+ Novo</button>
+    <span id="jobchip" class="chip" hidden></span>
+    <span class="sp"></span>
+    <button id="bPhone" class="ghost">📱 Celular</button>
+    <button id="bRender" class="primary">Renderizar vídeo</button>
+  </header>
+
+  <section class="panel layers"><div class="ph"><span>Camadas</span></div><div id="llist"></div>
+    <div class="ph"><span>Adicionar</span></div><div class="add" id="addmenu"></div></section>
+
+  <section class="view">
+    <div class="stage"><div class="cvwrap"><canvas id="cv" width="540" height="960"></canvas><div id="lsbox" hidden></div></div></div>
+    <div class="transport">
+      <button id="bStart" title="Início">⏮</button>
+      <button id="bPlay" class="primary" style="min-width:92px">▶ Tocar</button>
+      <span class="tc" id="tc">0:00.00 / 0:00.00</span>
+      <button id="bCut" title="Corta a camada selecionada no playhead">✂ Cortar aqui</button>
+    </div>
+  </section>
+
+  <section class="panel insp">
+    <nav class="tabs" id="tabs"></nav>
+    <div id="tabbody"></div>
+  </section>
+
+  <section class="panel tl">
+    <div class="tlbar"><span>Timeline</span><label>Zoom <input id="zoom" type="range" min="6" max="60" value="12"></label><span id="tlhint">Arraste as barras para mover; a borda direita muda a duração.</span></div>
+    <div class="tlscroll"><div class="tlin" id="tlin"><div class="ruler" id="ruler"></div><div id="rows"></div><div id="ph"></div></div></div>
+  </section>
+</div>
+<div id="toast" class="toast" hidden></div>
+<div id="ovl" class="overlay" hidden></div>
+<script src="engine.js"></script>
+<script src="panels.js"></script>
+<script src="app.js"></script>
+</body></html>
