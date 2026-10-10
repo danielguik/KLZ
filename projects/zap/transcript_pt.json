@@ -1,762 +1,746 @@
 [
  {
   "start": 0.0,
-  "end": 6.12,
-  "text": "A gente está aqui em Ropedale, em Massachusetts, Estados Unidos, para conferir como ficou essa",
+  "end": 11.16,
+  "text": "A gente está aqui em Hopedale, em Massachusetts, Estados Unidos, para conferir como que ficou essa porta da linha Império, porque quando a gente instalou, estava a menos 14, a neve estava aqui assim, ó, tudo branco.",
   "words": [
    {
     "start": 0.0,
-    "end": 0.22,
+    "end": 0.12,
     "text": "A"
    },
    {
-    "start": 0.22,
-    "end": 0.3,
+    "start": 0.12,
+    "end": 0.26,
     "text": "gente"
    },
    {
-    "start": 0.3,
-    "end": 0.44,
+    "start": 0.26,
+    "end": 0.38,
     "text": "está"
    },
    {
-    "start": 0.44,
-    "end": 0.56,
+    "start": 0.38,
+    "end": 0.5,
     "text": "aqui"
    },
    {
-    "start": 0.56,
-    "end": 0.66,
+    "start": 0.5,
+    "end": 0.64,
     "text": "em"
    },
    {
-    "start": 0.66,
-    "end": 1.3,
-    "text": "Ropedale,"
+    "start": 0.64,
+    "end": 1.24,
+    "text": "Hopedale,"
    },
    {
-    "start": 1.66,
-    "end": 1.88,
+    "start": 1.38,
+    "end": 1.78,
     "text": "em"
    },
    {
-    "start": 1.88,
-    "end": 2.5,
+    "start": 1.78,
+    "end": 2.16,
     "text": "Massachusetts,"
    },
    {
-    "start": 3.0,
-    "end": 3.22,
+    "start": 2.72,
+    "end": 3.08,
     "text": "Estados"
    },
    {
-    "start": 3.22,
-    "end": 3.62,
+    "start": 3.08,
+    "end": 3.44,
     "text": "Unidos,"
    },
    {
-    "start": 3.96,
-    "end": 4.28,
+    "start": 3.78,
+    "end": 4.2,
     "text": "para"
    },
    {
-    "start": 4.28,
-    "end": 4.78,
+    "start": 4.2,
+    "end": 4.76,
     "text": "conferir"
    },
    {
-    "start": 4.78,
-    "end": 5.0,
+    "start": 4.76,
+    "end": 4.94,
     "text": "como"
    },
    {
-    "start": 5.0,
-    "end": 5.4,
-    "text": "ficou"
-   },
-   {
-    "start": 5.4,
-    "end": 6.12,
-    "text": "essa"
-   }
-  ]
- },
- {
-  "start": 6.12,
-  "end": 10.6,
-  "text": "porta da Limpério, porque quando a gente instalou, estava a menos 14, a neve estava aqui assim ó,",
-  "words": [
-   {
-    "start": 6.12,
-    "end": 6.4,
-    "text": "porta"
-   },
-   {
-    "start": 6.4,
-    "end": 6.58,
-    "text": "da"
-   },
-   {
-    "start": 6.58,
-    "end": 7.0,
-    "text": "Limpério,"
-   },
-   {
-    "start": 7.08,
-    "end": 7.18,
-    "text": "porque"
-   },
-   {
-    "start": 7.18,
-    "end": 7.36,
-    "text": "quando"
-   },
-   {
-    "start": 7.36,
-    "end": 7.46,
-    "text": "a"
-   },
-   {
-    "start": 7.46,
-    "end": 7.56,
-    "text": "gente"
-   },
-   {
-    "start": 7.56,
-    "end": 7.9,
-    "text": "instalou,"
-   },
-   {
-    "start": 8.0,
-    "end": 8.14,
-    "text": "estava"
-   },
-   {
-    "start": 8.14,
-    "end": 8.48,
-    "text": "a"
-   },
-   {
-    "start": 8.48,
-    "end": 8.52,
-    "text": "menos"
-   },
-   {
-    "start": 8.52,
-    "end": 9.06,
-    "text": "14,"
-   },
-   {
-    "start": 9.3,
-    "end": 9.4,
-    "text": "a"
-   },
-   {
-    "start": 9.4,
-    "end": 9.64,
-    "text": "neve"
-   },
-   {
-    "start": 9.64,
-    "end": 9.88,
-    "text": "estava"
-   },
-   {
-    "start": 9.88,
-    "end": 10.16,
-    "text": "aqui"
-   },
-   {
-    "start": 10.16,
-    "end": 10.4,
-    "text": "assim"
-   },
-   {
-    "start": 10.4,
-    "end": 10.6,
-    "text": "ó,"
-   }
-  ]
- },
- {
-  "start": 10.86,
-  "end": 15.28,
-  "text": "agora está esse solzão, esse dia lindo, para ficar com a alfa, alfa as shapes, vendo como é que ficou.",
-  "words": [
-   {
-    "start": 10.86,
-    "end": 11.12,
-    "text": "agora"
-   },
-   {
-    "start": 11.12,
-    "end": 11.42,
-    "text": "está"
-   },
-   {
-    "start": 11.42,
-    "end": 11.56,
-    "text": "esse"
-   },
-   {
-    "start": 11.56,
-    "end": 11.96,
-    "text": "solzão,"
-   },
-   {
-    "start": 12.04,
-    "end": 12.08,
-    "text": "esse"
-   },
-   {
-    "start": 12.08,
-    "end": 12.3,
-    "text": "dia"
-   },
-   {
-    "start": 12.3,
-    "end": 12.62,
-    "text": "lindo,"
-   },
-   {
-    "start": 13.0,
-    "end": 13.14,
-    "text": "para"
-   },
-   {
-    "start": 13.14,
-    "end": 13.26,
-    "text": "ficar"
-   },
-   {
-    "start": 13.26,
-    "end": 13.38,
-    "text": "com"
-   },
-   {
-    "start": 13.38,
-    "end": 13.46,
-    "text": "a"
-   },
-   {
-    "start": 13.46,
-    "end": 13.58,
-    "text": "alfa,"
-   },
-   {
-    "start": 13.68,
-    "end": 13.78,
-    "text": "alfa"
-   },
-   {
-    "start": 13.78,
-    "end": 13.92,
-    "text": "as"
-   },
-   {
-    "start": 13.92,
-    "end": 14.18,
-    "text": "shapes,"
-   },
-   {
-    "start": 14.52,
-    "end": 14.7,
-    "text": "vendo"
-   },
-   {
-    "start": 14.7,
-    "end": 14.86,
-    "text": "como"
-   },
-   {
-    "start": 14.86,
-    "end": 14.96,
-    "text": "é"
-   },
-   {
-    "start": 14.96,
-    "end": 14.98,
+    "start": 4.94,
+    "end": 5.08,
     "text": "que"
    },
    {
-    "start": 14.98,
-    "end": 15.28,
+    "start": 5.08,
+    "end": 5.42,
+    "text": "ficou"
+   },
+   {
+    "start": 5.42,
+    "end": 6.04,
+    "text": "essa"
+   },
+   {
+    "start": 6.04,
+    "end": 6.36,
+    "text": "porta"
+   },
+   {
+    "start": 6.36,
+    "end": 6.5,
+    "text": "da"
+   },
+   {
+    "start": 6.5,
+    "end": 6.64,
+    "text": "linha"
+   },
+   {
+    "start": 6.64,
+    "end": 6.98,
+    "text": "Império,"
+   },
+   {
+    "start": 7.0,
+    "end": 7.1,
+    "text": "porque"
+   },
+   {
+    "start": 7.1,
+    "end": 7.34,
+    "text": "quando"
+   },
+   {
+    "start": 7.34,
+    "end": 7.44,
+    "text": "a"
+   },
+   {
+    "start": 7.44,
+    "end": 7.54,
+    "text": "gente"
+   },
+   {
+    "start": 7.54,
+    "end": 7.86,
+    "text": "instalou,"
+   },
+   {
+    "start": 7.9,
+    "end": 8.06,
+    "text": "estava"
+   },
+   {
+    "start": 8.06,
+    "end": 8.2,
+    "text": "a"
+   },
+   {
+    "start": 8.2,
+    "end": 8.48,
+    "text": "menos"
+   },
+   {
+    "start": 8.48,
+    "end": 8.88,
+    "text": "14,"
+   },
+   {
+    "start": 9.22,
+    "end": 9.32,
+    "text": "a"
+   },
+   {
+    "start": 9.32,
+    "end": 9.6,
+    "text": "neve"
+   },
+   {
+    "start": 9.6,
+    "end": 9.84,
+    "text": "estava"
+   },
+   {
+    "start": 9.84,
+    "end": 10.04,
+    "text": "aqui"
+   },
+   {
+    "start": 10.04,
+    "end": 10.28,
+    "text": "assim,"
+   },
+   {
+    "start": 10.44,
+    "end": 10.48,
+    "text": "ó,"
+   },
+   {
+    "start": 10.58,
+    "end": 10.94,
+    "text": "tudo"
+   },
+   {
+    "start": 10.94,
+    "end": 11.16,
+    "text": "branco."
+   }
+  ]
+ },
+ {
+  "start": 11.16,
+  "end": 15.2,
+  "text": "Agora está esse solzão, esse dia lindo. Estou aqui com o Rafael Fast Shapes, vendo como é que ficou.",
+  "words": [
+   {
+    "start": 11.16,
+    "end": 11.16,
+    "text": "Agora"
+   },
+   {
+    "start": 11.16,
+    "end": 11.34,
+    "text": "está"
+   },
+   {
+    "start": 11.34,
+    "end": 11.48,
+    "text": "esse"
+   },
+   {
+    "start": 11.48,
+    "end": 11.9,
+    "text": "solzão,"
+   },
+   {
+    "start": 11.94,
+    "end": 12.02,
+    "text": "esse"
+   },
+   {
+    "start": 12.02,
+    "end": 12.24,
+    "text": "dia"
+   },
+   {
+    "start": 12.24,
+    "end": 12.5,
+    "text": "lindo."
+   },
+   {
+    "start": 12.74,
+    "end": 13.08,
+    "text": "Estou"
+   },
+   {
+    "start": 13.08,
+    "end": 13.2,
+    "text": "aqui"
+   },
+   {
+    "start": 13.2,
+    "end": 13.32,
+    "text": "com"
+   },
+   {
+    "start": 13.32,
+    "end": 13.34,
+    "text": "o"
+   },
+   {
+    "start": 13.34,
+    "end": 13.56,
+    "text": "Rafael"
+   },
+   {
+    "start": 13.56,
+    "end": 13.82,
+    "text": "Fast"
+   },
+   {
+    "start": 13.82,
+    "end": 14.26,
+    "text": "Shapes,"
+   },
+   {
+    "start": 14.34,
+    "end": 14.62,
+    "text": "vendo"
+   },
+   {
+    "start": 14.62,
+    "end": 14.8,
+    "text": "como"
+   },
+   {
+    "start": 14.8,
+    "end": 14.92,
+    "text": "é"
+   },
+   {
+    "start": 14.92,
+    "end": 14.92,
+    "text": "que"
+   },
+   {
+    "start": 14.92,
+    "end": 15.2,
     "text": "ficou."
    }
   ]
  },
  {
-  "start": 21.62,
-  "end": 27.64,
-  "text": "O proprietário dessa casa, eu estou por um puxador cable e um motivo, com um sistema de led e também um puxador eletrônico.",
+  "start": 15.56,
+  "end": 29.32,
+  "text": "O proprietário dessa casa optou por um puxador cabo em um motivo com sistema de LED e também um puxador eletrônico, mais um item de exclusividade do Omax.",
   "words": [
    {
-    "start": 21.62,
-    "end": 21.84,
+    "start": 15.56,
+    "end": 16.02,
     "text": "O"
    },
    {
-    "start": 21.84,
-    "end": 22.18,
+    "start": 21.72,
+    "end": 22.2,
     "text": "proprietário"
    },
    {
-    "start": 22.18,
-    "end": 22.38,
+    "start": 22.2,
+    "end": 22.3,
     "text": "dessa"
    },
    {
-    "start": 22.38,
-    "end": 22.64,
-    "text": "casa,"
+    "start": 22.3,
+    "end": 22.58,
+    "text": "casa"
    },
    {
-    "start": 22.84,
-    "end": 22.84,
-    "text": "eu"
+    "start": 22.58,
+    "end": 22.9,
+    "text": "optou"
    },
    {
-    "start": 22.84,
-    "end": 22.88,
-    "text": "estou"
-   },
-   {
-    "start": 22.88,
-    "end": 23.06,
+    "start": 22.9,
+    "end": 23.0,
     "text": "por"
    },
    {
-    "start": 23.06,
-    "end": 23.16,
+    "start": 23.0,
+    "end": 23.12,
     "text": "um"
    },
    {
-    "start": 23.16,
-    "end": 23.46,
+    "start": 23.12,
+    "end": 23.4,
     "text": "puxador"
    },
    {
-    "start": 23.46,
-    "end": 23.8,
-    "text": "cable"
+    "start": 23.4,
+    "end": 23.72,
+    "text": "cabo"
    },
    {
-    "start": 23.8,
-    "end": 23.94,
-    "text": "e"
+    "start": 23.72,
+    "end": 23.84,
+    "text": "em"
    },
    {
-    "start": 23.94,
-    "end": 23.94,
+    "start": 23.84,
+    "end": 23.9,
     "text": "um"
    },
    {
-    "start": 23.94,
-    "end": 24.26,
-    "text": "motivo,"
+    "start": 23.9,
+    "end": 24.18,
+    "text": "motivo"
    },
    {
-    "start": 24.56,
-    "end": 24.66,
+    "start": 24.18,
+    "end": 24.52,
     "text": "com"
    },
    {
-    "start": 24.66,
-    "end": 24.74,
-    "text": "um"
-   },
-   {
-    "start": 24.74,
-    "end": 25.02,
+    "start": 24.52,
+    "end": 24.82,
     "text": "sistema"
    },
    {
-    "start": 25.02,
-    "end": 25.2,
+    "start": 24.82,
+    "end": 25.14,
     "text": "de"
    },
    {
-    "start": 25.2,
-    "end": 25.4,
-    "text": "led"
+    "start": 25.14,
+    "end": 25.34,
+    "text": "LED"
    },
    {
-    "start": 25.4,
-    "end": 25.98,
+    "start": 25.34,
+    "end": 25.86,
     "text": "e"
    },
    {
-    "start": 25.98,
-    "end": 26.28,
+    "start": 25.86,
+    "end": 26.22,
     "text": "também"
    },
    {
-    "start": 26.28,
-    "end": 26.52,
+    "start": 26.22,
+    "end": 26.44,
     "text": "um"
    },
    {
-    "start": 26.52,
-    "end": 27.06,
+    "start": 26.44,
+    "end": 26.96,
     "text": "puxador"
    },
    {
-    "start": 27.06,
-    "end": 27.64,
-    "text": "eletrônico."
+    "start": 26.96,
+    "end": 27.58,
+    "text": "eletrônico,"
+   },
+   {
+    "start": 27.64,
+    "end": 28.1,
+    "text": "mais"
+   },
+   {
+    "start": 28.1,
+    "end": 28.24,
+    "text": "um"
+   },
+   {
+    "start": 28.24,
+    "end": 28.42,
+    "text": "item"
+   },
+   {
+    "start": 28.42,
+    "end": 28.52,
+    "text": "de"
+   },
+   {
+    "start": 28.52,
+    "end": 28.88,
+    "text": "exclusividade"
+   },
+   {
+    "start": 28.88,
+    "end": 29.04,
+    "text": "do"
+   },
+   {
+    "start": 29.04,
+    "end": 29.32,
+    "text": "Omax."
    }
   ]
  },
  {
-  "start": 27.94,
-  "end": 31.56,
-  "text": "Mas o item de exclusividade do Almax, esse puxador, que além de minimalista e lindo,",
+  "start": 29.32,
+  "end": 38.52,
+  "text": "Esse puxador, que além de minimalista e lindo, tem um LED com sensor de presença, quando você chega a pé, e todas as tecnologias de desbloqueio mais modernas da atualidade.",
   "words": [
    {
-    "start": 27.94,
-    "end": 28.16,
-    "text": "Mas"
-   },
-   {
-    "start": 28.16,
-    "end": 28.34,
-    "text": "o"
-   },
-   {
-    "start": 28.34,
-    "end": 28.44,
-    "text": "item"
-   },
-   {
-    "start": 28.44,
-    "end": 28.56,
-    "text": "de"
-   },
-   {
-    "start": 28.56,
-    "end": 28.94,
-    "text": "exclusividade"
-   },
-   {
-    "start": 28.94,
-    "end": 29.12,
-    "text": "do"
-   },
-   {
-    "start": 29.12,
-    "end": 29.36,
-    "text": "Almax,"
+    "start": 29.32,
+    "end": 29.78,
+    "text": "Esse"
    },
    {
     "start": 29.78,
-    "end": 29.94,
-    "text": "esse"
-   },
-   {
-    "start": 29.94,
-    "end": 30.28,
+    "end": 30.24,
     "text": "puxador,"
    },
    {
-    "start": 30.34,
-    "end": 30.44,
+    "start": 30.3,
+    "end": 30.4,
     "text": "que"
    },
    {
-    "start": 30.44,
-    "end": 30.56,
+    "start": 30.4,
+    "end": 30.5,
     "text": "além"
    },
    {
-    "start": 30.56,
-    "end": 30.64,
+    "start": 30.5,
+    "end": 30.6,
     "text": "de"
    },
    {
-    "start": 30.64,
+    "start": 30.6,
     "end": 31.2,
     "text": "minimalista"
    },
    {
     "start": 31.2,
-    "end": 31.3,
+    "end": 31.22,
     "text": "e"
    },
    {
-    "start": 31.3,
-    "end": 31.56,
+    "start": 31.22,
+    "end": 31.44,
     "text": "lindo,"
-   }
-  ]
- },
- {
-  "start": 31.56,
-  "end": 38.66,
-  "text": "tem um led com sensor de presença quando você chega perto e todas as tecnologias de desbloqueio mais modernas da atualidade.",
-  "words": [
+   },
    {
-    "start": 31.56,
-    "end": 32.14,
+    "start": 31.58,
+    "end": 32.06,
     "text": "tem"
    },
    {
-    "start": 32.14,
-    "end": 32.3,
+    "start": 32.06,
+    "end": 32.24,
     "text": "um"
    },
    {
-    "start": 32.3,
-    "end": 32.52,
-    "text": "led"
+    "start": 32.24,
+    "end": 32.44,
+    "text": "LED"
    },
    {
-    "start": 32.52,
-    "end": 32.9,
+    "start": 32.44,
+    "end": 32.84,
     "text": "com"
    },
    {
-    "start": 32.9,
-    "end": 33.16,
+    "start": 32.84,
+    "end": 33.06,
     "text": "sensor"
    },
    {
-    "start": 33.16,
-    "end": 33.36,
+    "start": 33.06,
+    "end": 33.3,
     "text": "de"
    },
    {
-    "start": 33.36,
+    "start": 33.3,
     "end": 33.74,
-    "text": "presença"
+    "text": "presença,"
    },
    {
     "start": 33.74,
-    "end": 33.96,
+    "end": 33.9,
     "text": "quando"
    },
    {
-    "start": 33.96,
-    "end": 34.2,
+    "start": 33.9,
+    "end": 34.1,
     "text": "você"
    },
    {
-    "start": 34.2,
+    "start": 34.1,
     "end": 34.42,
     "text": "chega"
    },
    {
     "start": 34.42,
-    "end": 34.72,
-    "text": "perto"
+    "end": 34.48,
+    "text": "a"
    },
    {
-    "start": 34.72,
-    "end": 35.32,
+    "start": 34.48,
+    "end": 34.62,
+    "text": "pé,"
+   },
+   {
+    "start": 34.76,
+    "end": 35.22,
     "text": "e"
    },
    {
-    "start": 35.32,
-    "end": 35.56,
+    "start": 35.22,
+    "end": 35.54,
     "text": "todas"
    },
    {
-    "start": 35.56,
-    "end": 35.78,
+    "start": 35.54,
+    "end": 35.72,
     "text": "as"
    },
    {
-    "start": 35.78,
-    "end": 36.38,
+    "start": 35.72,
+    "end": 36.34,
     "text": "tecnologias"
    },
    {
-    "start": 36.38,
-    "end": 36.5,
+    "start": 36.34,
+    "end": 36.42,
     "text": "de"
    },
    {
-    "start": 36.5,
-    "end": 37.08,
+    "start": 36.42,
+    "end": 37.0,
     "text": "desbloqueio"
    },
    {
-    "start": 37.08,
-    "end": 37.72,
+    "start": 37.0,
+    "end": 37.66,
     "text": "mais"
    },
    {
-    "start": 37.72,
-    "end": 38.12,
+    "start": 37.66,
+    "end": 38.08,
     "text": "modernas"
    },
    {
-    "start": 38.12,
-    "end": 38.18,
+    "start": 38.08,
+    "end": 38.12,
     "text": "da"
    },
    {
-    "start": 38.18,
-    "end": 38.66,
+    "start": 38.12,
+    "end": 38.52,
     "text": "atualidade."
    }
   ]
  },
  {
-  "start": 42.57,
-  "end": 46.61,
-  "text": "Então se você mora nos Estados Unidos, já está disponível, contacte a Fast Shaves,",
+  "start": 39.3,
+  "end": 50.25,
+  "text": "Então, se você mora nos Estados Unidos, já está disponível. Contate o Fast Shapes, que a gente vai te atender com toda a tecnologia padrão Alucomax do Omax.",
   "words": [
    {
-    "start": 42.57,
-    "end": 43.05,
-    "text": "Então"
+    "start": 39.3,
+    "end": 39.7,
+    "text": "Então,"
    },
    {
-    "start": 43.05,
-    "end": 43.15,
+    "start": 43.03,
+    "end": 43.13,
     "text": "se"
    },
    {
-    "start": 43.15,
-    "end": 43.39,
+    "start": 43.13,
+    "end": 43.25,
     "text": "você"
    },
    {
-    "start": 43.39,
-    "end": 43.65,
+    "start": 43.25,
+    "end": 43.63,
     "text": "mora"
    },
    {
-    "start": 43.65,
-    "end": 43.73,
+    "start": 43.63,
+    "end": 43.69,
     "text": "nos"
    },
    {
-    "start": 43.73,
-    "end": 43.89,
+    "start": 43.69,
+    "end": 43.85,
     "text": "Estados"
    },
    {
-    "start": 43.89,
-    "end": 44.25,
+    "start": 43.85,
+    "end": 44.15,
     "text": "Unidos,"
    },
    {
-    "start": 44.49,
-    "end": 44.67,
+    "start": 44.31,
+    "end": 44.49,
     "text": "já"
    },
    {
-    "start": 44.67,
-    "end": 44.93,
+    "start": 44.49,
+    "end": 44.79,
     "text": "está"
    },
    {
-    "start": 44.93,
-    "end": 45.43,
-    "text": "disponível,"
+    "start": 44.79,
+    "end": 45.41,
+    "text": "disponível."
    },
    {
-    "start": 45.65,
-    "end": 45.95,
-    "text": "contacte"
+    "start": 45.49,
+    "end": 45.89,
+    "text": "Contate"
    },
    {
-    "start": 45.95,
-    "end": 45.97,
-    "text": "a"
+    "start": 45.89,
+    "end": 45.93,
+    "text": "o"
    },
    {
-    "start": 45.97,
-    "end": 46.15,
+    "start": 45.93,
+    "end": 46.11,
     "text": "Fast"
    },
    {
-    "start": 46.15,
+    "start": 46.11,
     "end": 46.61,
-    "text": "Shaves,"
-   }
-  ]
- },
- {
-  "start": 46.99,
-  "end": 50.31,
-  "text": "a gente vai te atender com toda a tecnologia padrão a Loco Max do Almax.",
-  "words": [
+    "text": "Shapes,"
+   },
    {
-    "start": 46.99,
-    "end": 47.07,
+    "start": 46.61,
+    "end": 47.01,
+    "text": "que"
+   },
+   {
+    "start": 47.01,
+    "end": 47.01,
     "text": "a"
    },
    {
-    "start": 47.07,
-    "end": 47.15,
+    "start": 47.01,
+    "end": 47.13,
     "text": "gente"
    },
    {
-    "start": 47.15,
-    "end": 47.31,
+    "start": 47.13,
+    "end": 47.25,
     "text": "vai"
    },
    {
-    "start": 47.31,
-    "end": 47.41,
+    "start": 47.25,
+    "end": 47.35,
     "text": "te"
    },
    {
-    "start": 47.41,
-    "end": 47.69,
+    "start": 47.35,
+    "end": 47.67,
     "text": "atender"
    },
    {
-    "start": 47.69,
-    "end": 47.93,
+    "start": 47.67,
+    "end": 47.85,
     "text": "com"
    },
    {
-    "start": 47.93,
-    "end": 48.29,
+    "start": 47.85,
+    "end": 48.23,
     "text": "toda"
    },
    {
-    "start": 48.29,
-    "end": 48.43,
+    "start": 48.23,
+    "end": 48.37,
     "text": "a"
    },
    {
-    "start": 48.43,
-    "end": 48.85,
+    "start": 48.37,
+    "end": 48.75,
     "text": "tecnologia"
    },
    {
-    "start": 48.85,
+    "start": 48.75,
     "end": 49.37,
     "text": "padrão"
    },
    {
     "start": 49.37,
-    "end": 49.47,
-    "text": "a"
+    "end": 49.87,
+    "text": "Alucomax"
    },
    {
-    "start": 49.47,
-    "end": 49.63,
-    "text": "Loco"
-   },
-   {
-    "start": 49.63,
-    "end": 49.91,
-    "text": "Max"
-   },
-   {
-    "start": 49.91,
-    "end": 50.11,
+    "start": 49.87,
+    "end": 50.05,
     "text": "do"
    },
    {
-    "start": 50.11,
-    "end": 50.31,
-    "text": "Almax."
+    "start": 50.05,
+    "end": 50.25,
+    "text": "Omax."
    }
   ]
  }
