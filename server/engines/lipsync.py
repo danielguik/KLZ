@@ -33,88 +33,35 @@ def ensure_wav2lip(progress=lambda m: None):
         inf.write_text(t)
     return d
 
-# ---------- detecção de rostos e escolha do rosto de cada falante ----------
-def probe(video):
-    import cv2
-    c = cv2.VideoCapture(str(video)); w, h, fps = int(c.get(3)), int(c.get(4)), c.get(5) or 30.0
-    n = c.get(7); c.release()
-    return w, h, fps, n / fps
+# ---------- escolha do rosto de cada falante (usa engines/faces.py) ----------
+from .faces import probe, scan, tracks as _tracks_all
 
-def scan(video, step=0.2, progress=lambda m: None):
-    """Lê o vídeo a cada `step` s. Candidatos (Haar) são validados pelo MediaPipe FaceMesh num recorte ampliado
-    (rejeita falsos rostos como pedras) e dão a abertura da boca. Retorna [(t, [{'box':(x,y,w,h),'ap':float}])]."""
-    import cv2, mediapipe as mp
-    cc = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-    fm = mp.solutions.face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=False, min_detection_confidence=0.3)
-    cap = cv2.VideoCapture(str(video)); fps = cap.get(5) or 30.0; total = cap.get(7) / fps
-    out = []; t = 0.0
-    while t < total:
-        cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000); ok, f = cap.read()
-        if not ok: break
-        g = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY); H, W = g.shape; faces = []
-        for (x, y, w, h) in cc.detectMultiScale(g, 1.1, 3, minSize=(20, 20)):
-            pad = int(w * 0.6); x0, y0, x1, y1 = max(x - pad, 0), max(y - pad, 0), min(x + w + pad, W), min(y + h + pad, H)
-            crop = cv2.resize(f[y0:y1, x0:x1], (256, 256), interpolation=cv2.INTER_CUBIC)
-            r = fm.process(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-            if not r.multi_face_landmarks: continue
-            lm = r.multi_face_landmarks[0].landmark
-            xs = np.array([q.x for q in lm]); ys = np.array([q.y for q in lm]); fh = ys.max() - ys.min()
-            bx = (x0 + xs.min() * (x1 - x0), y0 + ys.min() * (y1 - y0), (xs.max() - xs.min()) * (x1 - x0), fh * (y1 - y0))
-            faces.append({"box": tuple(float(v) for v in bx), "ap": float(abs(lm[13].y - lm[14].y) / fh)})
-        out.append((t, faces))
-        if int(t * 5) % 25 == 0: progress(f"Procurando rostos… {t:.0f}s/{total:.0f}s")
-        t += step
-    cap.release(); fm.close()
-    return out
-
-def _tracks(frames, W):
-    """Liga rostos de amostras consecutivas em trilhas."""
-    tracks = []
-    for i, (t, faces) in enumerate(frames):
-        used = set()
-        for tr in tracks:
-            last_i = max(tr["pts"])
-            if i - last_i > 3: continue
-            lb = tr["pts"][last_i]["box"]; lc = (lb[0] + lb[2] / 2, lb[1] + lb[3] / 2)
-            best, bd = None, 0.12 * W
-            for j, f in enumerate(faces):
-                if j in used: continue
-                b = f["box"]; d = np.hypot(b[0] + b[2] / 2 - lc[0], b[1] + b[3] / 2 - lc[1])
-                if d < bd: best, bd = j, d
-            if best is not None: tr["pts"][i] = faces[best]; used.add(best)
-        for j, f in enumerate(faces):
-            if j not in used: tracks.append({"pts": {i: f}})
-    tracks = [t for t in tracks if len(t["pts"]) >= 4]
-    # une pedaços da mesma pessoa: um termina e outro começa perto (até ~2 s depois, a ≤20% da largura de distância)
-    def ends(t): i = max(t["pts"]); b = t["pts"][i]["box"]; return i, (b[0] + b[2] / 2, b[1] + b[3] / 2)
-    def starts(t): i = min(t["pts"]); b = t["pts"][i]["box"]; return i, (b[0] + b[2] / 2, b[1] + b[3] / 2)
-    chains = []
-    for t in sorted(tracks, key=lambda t: min(t["pts"])):
-        si, sc = starts(t); best, bd = None, 0.2 * W
-        for c in chains:
-            ei, ec = ends(c)
-            if 0 <= si - ei <= 10 and np.hypot(sc[0] - ec[0], sc[1] - ec[1]) < bd:
-                best, bd = c, np.hypot(sc[0] - ec[0], sc[1] - ec[1])
-        if best is None: chains.append({"pts": dict(t["pts"])})
-        else: best["pts"].update(t["pts"])
-    return chains
-
-def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0, margin=0.9, step=0.2):
-    """Para cada falante, escolhe o rosto cuja boca mais se mexe quando ele fala e propõe trechos contínuos."""
+def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0, margin=0.9, step=0.2, frames=None, prefer=None):
+    """Para cada falante, escolhe o rosto cuja boca mais se mexe quando ele fala e propõe trechos contínuos.
+    Se o falante já tem um rosto atribuído (speaker['face_chain']), usa-o."""
     w, h, fps, total = probe(video)
-    frames = scan(video, step, progress)
+    frames = frames or scan(video, step, progress)
     if not frames: return []
-    tracks = _tracks(frames, w); times = [f[0] for f in frames]; n = len(times); spans = []
+    st = frames[1][0] - frames[0][0] if len(frames) > 1 else step
+    chains = _tracks_all(frames, w, st); times = [f[0] for f in frames]; n = len(times); spans = []
     for spk in speakers:
         act = np.array([any(p["speaker"] == spk["id"] and p["s"] <= t <= p["e"] for p in phrases) for t in times], dtype=float)
-        if act.sum() < 4 or not tracks: continue
+        if act.sum() < 4 or not chains: continue
         best, bs = None, -9
-        for tr in tracks:
+        pref = (prefer or {}).get(spk["id"])
+        if pref:  # rostos já ligados a esta pessoa pela identificação voz+boca: usa todos eles (a pessoa pode aparecer em vários planos)
+            merged = {}
+            for ci in pref:
+                if ci < len(chains):
+                    for i, f in chains[ci]["pts"].items(): merged.setdefault(i, f)
+            cand = [{"pts": merged}] if merged else []
+        else: cand = chains
+        for tr in cand:
             ap = np.full(n, np.nan)
-            for i, f in tr["pts"].items(): ap[i] = f["ap"]
-            mo = np.zeros(n)
-            for i in range(n):  # variação local da abertura da boca (≈1 s): alta quando a pessoa fala
-                win = ap[max(0, i - 2): i + 3]; win = win[~np.isnan(win)]
+            for i, f in tr["pts"].items(): ap[i] = f["mar"]
+            mo = np.zeros(n); k = max(2, int(0.5 / st))
+            for i in range(n):
+                win = ap[max(0, i - k): i + k + 1]; win = win[~np.isnan(win)]
                 mo[i] = win.std() if len(win) >= 3 else 0.0
             m = ~np.isnan(ap)
             if m.sum() < 6 or act[m].std() < 1e-6 or mo[m].std() < 1e-9: sc = -1 + 0.01 * m.sum() / n
@@ -122,14 +69,14 @@ def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0
             if sc > bs: best, bs = tr, sc
         if best is None: continue
         pres = [i in best["pts"] for i in range(n)]
-        i = 0
+        i = 0; maxgap = int(0.8 / st)
         while i < n:
             if not pres[i]: i += 1; continue
             j = i; gap = 0
-            while j + 1 < n and (pres[j + 1] or gap < 7):
+            while j + 1 < n and (pres[j + 1] or gap < maxgap):
                 gap = 0 if pres[j + 1] else gap + 1; j += 1
             while j > i and not pres[j]: j -= 1
-            a, b = times[i], times[j] + step
+            a, b = times[i], times[j] + st
             if b - a >= min_len and act[i:j + 1].sum() >= 3:
                 bx = np.array([best["pts"][k]["box"] for k in range(i, j + 1) if k in best["pts"]])
                 cx = float(np.median(bx[:, 0] + bx[:, 2] / 2)); cy = float(np.median(bx[:, 1] + bx[:, 3] / 2)); fw = float(np.median(bx[:, 2]))
@@ -140,7 +87,7 @@ def suggest_spans(video, phrases, speakers, progress=lambda m: None, min_len=1.0
                 spans.append({"speaker": spk["id"], "s": round(a, 2), "e": round(b, 2), "rect": {"x": x0, "y": y0, "w": side, "h": side}, "face_px": int(fw), "score": round(bs, 2)})
             i = j + 1
     for k, sp in enumerate(sorted(spans, key=lambda s: s["s"])):
-        small = sp["face_px"] < 80  # rosto pequeno no quadro: o lip-sync fica borrado e estranho
+        small = sp["face_px"] < 80
         sp.update({"id": f"ls{k + 1}", "enabled": not small, "strength": 1.0, "status": "todo", "file": None,
                    "warn": (f"Rosto pequeno ({sp['face_px']} px de largura): o lip-sync tende a ficar borrado. Desligado por padrão; ligue se quiser testar." if small else "")})
     return sorted(spans, key=lambda s: s["s"])

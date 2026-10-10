@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np, soundfile as sf
 from . import store
 from .config import STUDIO, W2L_DIR
-from .engines import asr, diar, separate, tts, voiceprint, translate, lipsync
+from .engines import asr, diar, separate, tts, voiceprint, translate, lipsync, avdiar
 
 COLORS = ["#4da3ff", "#ffb020", "#4cc38a", "#ff6b9a", "#b58bff", "#ff8a4c"]
 KEYS = set("hopedale massachusetts celsius snow sunshine beautiful led sensor exclusive minimalist recessed handle unlocking available".split())
@@ -29,7 +29,7 @@ def build_phrases(segments, max_dur=6.5, protect=()):
     def flush():
         nonlocal cur
         if cur:
-            out.append({"s": round(cur[0]["start"], 2), "e": round(cur[-1]["end"], 2), "pt": " ".join(w["text"] for w in cur)})
+            out.append({"s": round(cur[0]["start"], 2), "e": round(cur[-1]["end"], 2), "pt": " ".join(w["text"] for w in cur), "speaker": f"S{cur[0].get('spk', 0) + 1}"})
         cur = []
     def sent_start(j):  # palavra j abre uma nova sentença (maiúscula sem ponto antes; nomes do glossário e palavras funcionais não contam)
         if j <= 0 or j >= len(words): return False
@@ -38,7 +38,7 @@ def build_phrases(segments, max_dur=6.5, protect=()):
     for i, w in enumerate(words):
         if cur:
             d0 = cur[-1]["end"] - cur[0]["start"]
-            if w["start"] - cur[-1]["end"] > 0.6 or (sent_start(i) and len(cur) >= 2 and d0 >= 1.0): flush()
+            if w["start"] - cur[-1]["end"] > 0.6 or w.get("spk", 0) != cur[-1].get("spk", 0) or (sent_start(i) and len(cur) >= 2 and d0 >= 1.0): flush()
         cur.append(w)
         d = w["end"] - cur[0]["start"]
         near = next((words[j]["start"] for j in range(i + 1, min(i + 6, len(words))) if sent_start(j)), None)
@@ -48,7 +48,7 @@ def build_phrases(segments, max_dur=6.5, protect=()):
     # sobras muito curtas (<0.8 s) voltam para a frase anterior
     merged = []
     for p in out:
-        if merged and (p["e"] - p["s"] < 0.8) and p["s"] - merged[-1]["e"] < 0.8:
+        if merged and (p["e"] - p["s"] < 0.8) and p["s"] - merged[-1]["e"] < 0.8 and p["speaker"] == merged[-1]["speaker"]:
             merged[-1]["e"] = p["e"]; merged[-1]["pt"] += " " + p["pt"]
         else: merged.append(p)
     for k, p in enumerate(merged, start=1): p["id"] = f"p{k}"
@@ -63,7 +63,7 @@ def assign_speakers(phrases, labels, segs):
         p["speaker"] = f"S{(max(score, key=score.get) if score else 0) + 1}"
 
 # ---------------------------------------------------------------- vozes
-def make_voice(pid, name, src_audio, speaker=None, progress=lambda m: None):
+def make_voice(pid, name, src_audio, speaker=None, progress=lambda m: None, force_builtin=False):
     """Cria um perfil de voz a partir de um áudio: limpa, corta ~25s de fala e analisa o tom."""
     d = P(pid); proj = store.load(pid)
     vid = f"V{len(proj['voices']) + 1}"
@@ -71,11 +71,33 @@ def make_voice(pid, name, src_audio, speaker=None, progress=lambda m: None):
     sh("ffmpeg", "-y", "-loglevel", "error", "-i", src_audio, "-ac", 1, "-ar", 22050, "-af",
        "silenceremove=start_periods=1:start_threshold=-45dB:stop_periods=-1:stop_threshold=-45dB:stop_duration=0.4,highpass=f=70", "-t", 25, ref)
     an = voiceprint.analyze(ref)
+    short = an.get("seconds", 0) < 5.0 or force_builtin
     voice = {"id": vid, "name": name, "ref": f"voices/{vid}.wav", "engine": "xtts", "analysis": an,
+             "builtin": (tts.default_builtin(an.get("f0")) if short else None),
+             "note": ("Amostra curta (%.1f s): clonar daria resultado ruim; usando uma voz da biblioteca com o tom ajustado ao da pessoa. Envie um áudio dela (10–25 s) para clonar." % an.get("seconds", 0)) if short else "",
              "params": {"speed": 1.0, "temperature": 0.6, "pitch": 0.0, "gain": 1.0, "auto_pitch": False}}
     def fn(p): p["voices"].append(voice)
     store.update(pid, fn)
     return voice
+
+def speaker_reference_words(pid, spk_id, vocals16, words, k):
+    """Amostra de voz do falante k: as falas dele (da trilha de voz separada, mais limpa), mais longas primeiro, até ~22 s."""
+    y, sr = sf.read(vocals16, dtype="float32"); runs, cur = [], []
+    for w in words:
+        if w.get("spk") == k:
+            if cur and w["start"] - cur[-1]["end"] > 0.4: runs.append(cur); cur = []
+            cur.append(w)
+        elif cur: runs.append(cur); cur = []
+    if cur: runs.append(cur)
+    runs = sorted(runs, key=lambda r: r[-1]["end"] - r[0]["start"], reverse=True)
+    parts, tot = [], 0.0
+    for r in runs:
+        a, b = max(r[0]["start"] - 0.05, 0), r[-1]["end"] + 0.05
+        parts.append(y[int(a * sr):int(b * sr)]); tot += b - a
+        if tot >= 22: break
+    out = P(pid) / "voices" / f"_ref_{spk_id}.wav"
+    sf.write(out, np.concatenate(parts) if parts else y[: sr * 5], sr)
+    return out, tot
 
 def speaker_reference(pid, spk_id, vocals16, labels, segs, speaker_idx):
     """Junta até ~22s de fala do falante (da trilha de voz já separada, mais limpa) como amostra para clonar."""
@@ -92,7 +114,17 @@ def speaker_reference(pid, spk_id, vocals16, labels, segs, speaker_idx):
 # ---------------------------------------------------------------- camadas
 def src_for(proj, rel): return rel
 
+def place(proj, max_shift=1.5, gap=0.06):
+    """Posição real (t0) de cada fala: começa no instante original, mas nunca antes do fim da fala anterior (o inglês costuma ser mais longo)."""
+    prev_end = 0.0
+    for ph in proj["phrases"]:
+        t0 = max(ph["s"], prev_end + gap) if prev_end else ph["s"]
+        t0 = min(t0, ph["s"] + max_shift)
+        ph["t0"] = round(t0, 3)
+        prev_end = t0 + (ph["dur"] / max(ph.get("rate", 1), .01) if ph.get("audio") else (ph["e"] - ph["s"]))
+
 def compile_layers(proj):
+    place(proj)
     """(Re)gera as camadas automáticas. Camadas criadas pelo usuário (sem auto:true) são preservadas."""
     keep = [l for l in proj["layers"] if not l.get("auto")]
     D = proj["durationSec"]; L = []
@@ -110,7 +142,7 @@ def compile_layers(proj):
         a = ph.get("audio")
         if a:
             L.append({"id": f"a_{ph['id']}", "auto": True, "phrase": ph["id"], "name": f"{ph['id']} · {ph['speaker']}: {ph['en'][:26]}", "type": "audio",
-                      "start": ph["s"], "duration": round(ph["dur"] / ph.get("rate", 1) + 0.05, 2), "src": a, "trimStart": 0,
+                      "start": ph["t0"], "duration": round(ph["dur"] / ph.get("rate", 1) + 0.05, 2), "src": a, "trimStart": 0,
                       "volume": proj["mix"]["voice"], "rate": ph.get("rate", 1)})
     L.append(captions_layer(proj))
     proj["layers"] = L + keep
@@ -119,12 +151,13 @@ def phrase_words(ph, idx):
     toks = (ph.get("en") or "").split()
     if not toks: return []
     D = (ph.get("dur", ph["e"] - ph["s"]) / max(ph.get("rate", 1), .01)) if ph.get("dur") else ph["e"] - ph["s"]
+    T0 = ph.get("t0", ph["s"])
     Ltot = sum(len(t) + 2 for t in toks); t = 0.0; out = []
     for tk in toks:
         m = re.match(r"^\*(.+?)\*([.,:;!?]*)$", tk); txt = m.group(1) + m.group(2) if m else tk
         base = re.sub(r"[.,:;!?'’]+$", "", txt).lower()
         dd = D * (len(tk) + 2) / Ltot
-        out.append({"text": txt, "start": round(ph["s"] + t, 3), "end": round(ph["s"] + t + dd, 3), "key": bool(m) or base in KEYS or base in {k.lower() for k in ph.get("_keys", [])}, "p": idx})
+        out.append({"text": txt, "start": round(T0 + t, 3), "end": round(T0 + t + dd, 3), "key": bool(m) or base in KEYS or base in {k.lower() for k in ph.get("_keys", [])}, "p": idx})
         t += dd
     return out
 
@@ -145,6 +178,25 @@ def refresh_phrase_layers(proj):
         if o and l.get("auto") and l["type"] in ("audio", "video", "glass"):
             for k in ("volume", "brightness", "contrast", "saturate", "zoomPunches", "x", "y", "w", "h", "blur", "tint", "radius", "borderColor"):
                 if k in o: l[k] = o[k]
+
+# ---------------------------------------------------------------- falantes (voz + boca)
+def analyze_speakers(pid, segs, voc16, n_speakers, glossary, progress):
+    """Descobre quem fala cada palavra (boca + voz), quebra as frases a cada troca de falante e cria uma voz por pessoa."""
+    d = P(pid); proj = store.load(pid); media = d / proj["media"]
+    words = [x for s_ in segs for x in s_["words"]]
+    av = avdiar.run(media, voc16, words, n_speakers, cache=d / "audio" / "faces.json", progress=progress)
+    for w, l in zip(words, av["labels"]): w["spk"] = int(l)
+    phrases = build_phrases(segs, protect=re.findall(r"[\wÀ-ú]+", glossary or ""))
+    for f in (d / "voices").glob("*"): f.unlink()
+    store.update(pid, lambda p: p.__setitem__("voices", []))
+    speakers = []
+    for k in range(av["n"]):
+        sid = f"S{k + 1}"
+        ref, secs = speaker_reference_words(pid, sid, voc16, words, k)
+        v = make_voice(pid, f"Voz do falante {k + 1}", ref, progress=progress)
+        speakers.append({"id": sid, "name": f"Falante {k + 1}", "voice": v["id"], "color": COLORS[k % len(COLORS)]})
+    groups = {f"S{k + 1}": g for k, g in enumerate(av.get("chains", []))}
+    return speakers, phrases, {"face_groups": groups, "mode": av["mode"]}
 
 # ---------------------------------------------------------------- ingestão
 def ingest(pid, language="pt", n_speakers=None, glossary="", progress=lambda m: None, force_asr=False):
@@ -174,46 +226,29 @@ def ingest(pid, language="pt", n_speakers=None, glossary="", progress=lambda m: 
         segs = asr.run(voc16, language, glossary or None, progress)
         if not segs and voc16 != a16: segs = asr.run(a16, language, glossary or None, progress)
         tr.write_text(json.dumps(segs, ensure_ascii=False))
-    words = [x for s in segs for x in s["words"]]
-    phrases = build_phrases(segs, protect=re.findall(r"[\wÀ-ú]+", glossary or ""))
-    labels, chunks, n = diar.run(voc16, words, n_speakers, progress=progress)
-    assign_speakers(phrases, labels, chunks)
-    speakers, voices = [], []
-    for k in range(n):
-        sid = f"S{k + 1}"
-        ref = speaker_reference(pid, sid, voc16, labels, chunks, k)
-        v = make_voice(pid, f"Voz do falante {k + 1}", ref, progress=progress)
-        speakers.append({"id": sid, "name": f"Falante {k + 1}", "voice": v["id"], "color": COLORS[k % len(COLORS)]})
+    speakers, phrases, info = analyze_speakers(pid, segs, voc16, n_speakers, glossary, progress)
     for p_ in phrases: p_.update({"en": "", "voiced": None, "audio": None, "status": "sem tradução"})
     def fn(p):
-        p.update({"width": 1080, "height": 1920, "fps": 30, "durationSec": round(total, 2), "native": [w, h], "speakers": speakers, "phrases": phrases,
+        p.update({"width": 1080, "height": 1920, "fps": 30, "durationSec": round(total, 2), "native": [w, h], "speakers": speakers, "phrases": phrases, "face_groups": info.get("face_groups", {}), "diar_mode": info.get("mode", ""),
                   "has_separation": has_sep, "glossary": glossary, "status": "transcrito", "cover_old_subs": p.get("cover_old_subs", False)})
         compile_layers(p)
     store.update(pid, fn)
     return {"phrases": len(phrases), "speakers": len(speakers)}
 
 def rediarize(pid, n_speakers=None, progress=lambda m: None):
-    """Refaz só a identificação de falantes e as vozes de referência (rápido: não transcreve de novo). Zera as vozes geradas."""
+    """Refaz a identificação de falantes (voz + boca), as frases e as vozes. Não transcreve de novo; apaga traduções e vozes geradas."""
     d = P(pid); proj = store.load(pid)
-    segs = json.loads((d / "audio" / "transcript.json").read_text()); words = [x for s in segs for x in s["words"]]
+    segs = json.loads((d / "audio" / "transcript.json").read_text())
     voc16 = d / "audio" / ("vocals16k.wav" if (d / "audio" / "vocals16k.wav").exists() else "src16k.wav")
-    labels, chunks, n = diar.run(voc16, words, n_speakers, progress=progress)
-    for f in (d / "voices").glob("*"): f.unlink()
-    phrases = proj["phrases"]; assign_speakers(phrases, labels, chunks)
-    speakers = []
-    def fn(p): p["voices"] = []
-    store.update(pid, fn)
-    for k in range(n):
-        sid = f"S{k + 1}"; ref = speaker_reference(pid, sid, voc16, labels, chunks, k)
-        v = make_voice(pid, f"Voz do falante {k + 1}", ref, progress=progress)
-        speakers.append({"id": sid, "name": f"Falante {k + 1}", "voice": v["id"], "color": COLORS[k % len(COLORS)]})
-    def fn2(p):
-        p["speakers"] = speakers; p["phrases"] = phrases
-        for ph in p["phrases"]: ph.update({"audio": None, "voiced": None})
+    speakers, phrases, info = analyze_speakers(pid, segs, voc16, n_speakers, proj.get("glossary", ""), progress)
+    for p_ in phrases: p_.update({"en": "", "voiced": None, "audio": None, "status": "sem tradução"})
+    def fn(p):
+        p.update({"speakers": speakers, "phrases": phrases, "face_groups": info["face_groups"], "diar_mode": info["mode"]})
         p["layers"] = [l for l in p["layers"] if not l.get("phrase")]
-        refresh_phrase_layers(p)
-    store.update(pid, fn2)
-    return {"speakers": n}
+        p["lipsync"]["spans"] = []
+        compile_layers(p)
+    store.update(pid, fn)
+    return {"speakers": len(speakers), "phrases": len(phrases)}
 
 # ---------------------------------------------------------------- tradução
 def translate_all(pid, ids=None, progress=lambda m: None):
@@ -231,10 +266,13 @@ def translate_all(pid, ids=None, progress=lambda m: None):
 
 # ---------------------------------------------------------------- voz por frase
 def _params_hash(v, say):
-    return hashlib.md5(("v2|" + say + json.dumps(v["params"], sort_keys=True) + v["id"] + v["ref"]).encode()).hexdigest()[:10]
+    return hashlib.md5(("v3|" + say + json.dumps(v["params"], sort_keys=True) + v["id"] + v["ref"] + str(v.get("builtin"))).encode()).hexdigest()[:10]
 
 def say_text(proj, text):
+    import unicodedata
     for a, b in (proj.get("pronounce") or {}).items(): text = re.sub(re.escape(a), b, text, flags=re.I)
+    # o XTTS trava (pausas longas, silêncio) com letras acentuadas dentro de texto em inglês: Império -> Imperio
+    text = "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c))
     return text.replace("*", "")
 
 def voice_phrase(pid, ph_id, progress=lambda m: None):
@@ -251,7 +289,7 @@ def voice_phrase(pid, ph_id, progress=lambda m: None):
         progress(f"Gerando a voz da frase {ph_id} ({spk['name']})…")
         speed = pr["speed"]; trimmed = d / "dub" / f"{ph_id}_{h}_trim.wav"
         for _ in range(3):  # se passar do tempo da fala original, acelera um pouco (até 1.35x)
-            tts.synth(say, d / v["ref"], raw, speed=speed, temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"))
+            tts.synth(say, d / v["ref"], raw, speed=speed, temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"), builtin=v.get("builtin"))
             voiceprint.trim_silence(raw, trimmed); dd = tts.duration(trimmed)
             if dd <= slot * 1.03 or speed >= 1.35: break
             speed = min(speed * dd / slot, 1.35)
@@ -290,7 +328,7 @@ def preview_voice(pid, vid, text="This is how this voice sounds. Adjust the tone
     proj = store.load(pid); d = P(pid); v = next(x for x in proj["voices"] if x["id"] == vid); pr = v["params"]
     raw = d / "voices" / f"{vid}_prev_raw.wav"; out = d / "voices" / f"{vid}_prev.wav"
     progress("Gerando amostra da voz…")
-    tts.synth(text, d / v["ref"], raw, speed=pr["speed"], temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"))
+    tts.synth(text, d / v["ref"], raw, speed=pr["speed"], temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"), builtin=v.get("builtin"))
     semis = pr.get("pitch", 0.0)
     if pr.get("auto_pitch") and v["analysis"].get("f0"): semis += voiceprint.match_semitones(v["analysis"]["f0"], raw)
     voiceprint.pitch_shift(raw, out, semis, pr.get("gain", 1.0)); raw.unlink(missing_ok=True)
@@ -301,7 +339,7 @@ def calibrate_voice(pid, vid, progress=lambda m: None):
     proj = store.load(pid); d = P(pid); v = next(x for x in proj["voices"] if x["id"] == vid)
     raw = d / "voices" / f"{vid}_cal.wav"
     progress("Medindo o tom da voz gerada…")
-    tts.synth("Calibrating the tone of this voice so it matches the original speaker.", d / v["ref"], raw, speed=v["params"]["speed"], temperature=v["params"]["temperature"], engine=v["engine"])
+    tts.synth("Calibrating the tone of this voice so it matches the original speaker.", d / v["ref"], raw, speed=v["params"]["speed"], temperature=v["params"]["temperature"], engine=v["engine"], builtin=v.get("builtin"))
     semis = voiceprint.match_semitones(v["analysis"].get("f0"), raw); raw.unlink(missing_ok=True)
     def fn(p):
         x = next(y for y in p["voices"] if y["id"] == vid); x["params"]["pitch"] = round(semis, 2); x["params"]["auto_pitch"] = False
@@ -314,9 +352,9 @@ def span_audio(pid, proj, span, dst):
     d = P(pid); s, e = span["s"], span["e"]; ins, fl, k = [], [], 0
     for ph in proj["phrases"]:
         if ph["speaker"] != span["speaker"] or not ph.get("audio"): continue
-        end = ph["s"] + ph["dur"] / ph.get("rate", 1)
-        if end < s or ph["s"] > e: continue
-        ins += ["-i", str(d / ph["audio"])]; ms = int(max(0, (ph["s"] - s)) * 1000); off = max(0, s - ph["s"])
+        t0 = ph.get("t0", ph["s"]); end = t0 + ph["dur"] / ph.get("rate", 1)
+        if end < s or t0 > e: continue
+        ins += ["-i", str(d / ph["audio"])]; ms = int(max(0, (t0 - s)) * 1000); off = max(0, s - t0)
         fl.append(f"[{k}:a]atempo={ph.get('rate', 1)},atrim=start={off},asetpts=PTS-STARTPTS,adelay={ms}|{ms}[a{k}]"); k += 1
     if not k: raise RuntimeError("O falante deste trecho ainda não tem voz gerada.")
     fl.append("".join(f"[a{j}]" for j in range(k)) + f"amix=inputs={k}:normalize=0,apad=whole_dur={e - s},atrim=0:{e - s}[o]")
@@ -324,7 +362,9 @@ def span_audio(pid, proj, span, dst):
 
 def lipsync_suggest(pid, progress=lambda m: None):
     proj = store.load(pid); d = P(pid)
-    spans = lipsync.suggest_spans(d / proj["media"], proj["phrases"], proj["speakers"], progress)
+    fc = d / "audio" / "faces.json"
+    frames = [(t, fs) for t, fs in json.loads(fc.read_text())] if fc.exists() else None
+    spans = lipsync.suggest_spans(d / proj["media"], proj["phrases"], proj["speakers"], progress, frames=frames, prefer=proj.get("face_groups") or None)
     def fn(p): p["lipsync"]["spans"] = spans
     store.update(pid, fn)
     return {"spans": len(spans)}

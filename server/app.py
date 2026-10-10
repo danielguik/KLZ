@@ -31,6 +31,11 @@ def caps():
     return {"translate": translate.available(), "elevenlabs": bool(os.environ.get("ELEVENLABS_API_KEY")),
             "separate": True, "lipsync": "wav2lip", "whisper": os.environ.get("KLZ_WHISPER", "large-v3")}
 
+@app.get("/api/builtin_voices", dependencies=[Depends(auth)])
+def builtin_voices():
+    from .engines import tts
+    return tts.builtin_names()
+
 @app.get("/api/projects", dependencies=[Depends(auth)])
 def projects(): return store.list_projects()
 
@@ -142,6 +147,7 @@ def add_voice(pid: str, name: str = Form("Nova voz"), file: UploadFile = File(..
 class VoicePatch(BaseModel):
     name: str | None = None
     params: dict | None = None
+    builtin: str | None = None   # nome de voz da biblioteca; "" = clonar da amostra
 
 @app.put("/api/projects/{pid}/voices/{vid}", dependencies=[Depends(auth)])
 def patch_voice(pid: str, vid: str, b: VoicePatch):
@@ -149,6 +155,7 @@ def patch_voice(pid: str, vid: str, b: VoicePatch):
         v = next(x for x in p["voices"] if x["id"] == vid)
         if b.name: v["name"] = b.name
         if b.params: v["params"].update(b.params)
+        if b.builtin is not None: v["builtin"] = b.builtin or None
     p = store.update(pid, fn); p["stale"] = pipeline.stale_ids(p); return p
 
 @app.post("/api/projects/{pid}/voices/{vid}/preview", dependencies=[Depends(auth)])

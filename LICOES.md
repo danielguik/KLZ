@@ -29,3 +29,7 @@
 - Haar acha falsos rostos (pedras); validar com MediaPipe FaceMesh num recorte ampliado (e dá a abertura da boca). mediapipe novo (1.x) não tem `solutions`: fixar 0.10.14 e numpy<2.
 - Rastreamento: unir pedaços de trilha da mesma pessoa por posição (≤2 s de intervalo); senão cada pedaço vira uma "pessoa".
 - Shell: `pkill -f`/`pgrep -f` com o nome do script no próprio comando mata o shell (exit 144). Usar `ps -eo pid,args | awk '/padrão/ && !/awk/ {print $1}'` ou arquivo .pid.
+- DIARIZAÇÃO AUDIOVISUAL (resolveu "2 pessoas falam"): só voz falha (mesmo falante ~0,4 de similaridade ao ar livre). Funciona: (1) atividade da boca (desvio do MAR por palavra) onde há rosto; (2) aprender a voz de cada pessoa só de trechos corridos com fala clara (≥0,030), sem janelas que vazem p/ vizinhas; (3) Viterbi voz+boca com custo de troca. Riso/sorriso dá boca ativa (~0,02) mas com a voz da outra pessoa: se a voz é igual, é reação, não falante novo. Verificar sempre contra quadros reais.
+- XTTS trava (pausas, 10 s p/ 60 caracteres) com letras acentuadas no meio do inglês (Império): tirar acentos do texto falado.
+- Amostra de voz curta (<5 s, ex.: 0,9 s) não clona: usar voz da biblioteca do XTTS (Damien Black…) e avisar; não ligar auto-tom com amostra curta (f0 pouco confiável).
+- Quando o inglês é mais longo que o português, a fala seguinte começa depois do fim da anterior (t0 = max(s, fim_anterior+0,06), deslocamento máx. 1,5 s) em vez de sobrepor.

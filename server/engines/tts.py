@@ -22,11 +22,23 @@ def _xtts():
         _tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
     return _tts
 
-def synth(text, ref_wav, out_wav, speed=1.0, temperature=0.6, language="en", engine="xtts", voice_id=None):
+def builtin_names():
+    t = _xtts()
+    try: return sorted(t.synthesizer.tts_model.speaker_manager.speaker_names)
+    except Exception: return []
+
+def default_builtin(f0=None):
+    """Voz da biblioteca padrão para quando a amostra é curta demais para clonar (masculina grave por padrão)."""
+    return "Claribel Dervla" if (f0 and f0 > 175) else "Damien Black"
+
+def synth(text, ref_wav, out_wav, speed=1.0, temperature=0.6, language="en", engine="xtts", voice_id=None, builtin=None):
     if engine == "elevenlabs" and os.environ.get("ELEVENLABS_API_KEY"):
         return _eleven(text, out_wav, voice_id, speed)
     t = _xtts()
-    t.tts_to_file(text=text, speaker_wav=str(ref_wav), language=language, file_path=str(out_wav), speed=float(speed), temperature=float(temperature))
+    if builtin:
+        t.tts_to_file(text=text, speaker=builtin, language=language, file_path=str(out_wav), speed=float(speed), temperature=float(temperature))
+    else:
+        t.tts_to_file(text=text, speaker_wav=str(ref_wav), language=language, file_path=str(out_wav), speed=float(speed), temperature=float(temperature))
     return out_wav
 
 def _eleven(text, out_wav, voice_id, speed):
