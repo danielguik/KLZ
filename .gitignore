@@ -1,0 +1,4 @@
+projects/*/media/
+projects/*/dub/
+projects/*/*.mp4
+__pycache__/

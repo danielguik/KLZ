@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+anthropic
+httpx
+python-multipart
+# opcional, transcrição local: faster-whisper

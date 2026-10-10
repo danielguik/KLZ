@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KLZ Editor</title>
+<style>
+:root{--bg:#1e1e1e;--panel:#262626;--line:#3a3a3a;--txt:#d6d6d6;--dim:#8a8a8a;--acc:#4da3ff;--clip:#3d6b99;--aud:#4a8a5a;--txtc:#9a6bb0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:12px system-ui,sans-serif;height:100vh;display:grid;
+grid-template-columns:230px 1fr 300px;grid-template-rows:34px 1fr 270px;grid-template-areas:"top top top" "left view right" "tl tl right"}
+.panel{background:var(--panel);border:1px solid var(--line);overflow:auto;min-height:0}
+h4{margin:0;padding:6px 8px;background:#2f2f2f;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);position:sticky;top:0;z-index:2}
+#top{grid-area:top;display:flex;gap:8px;align-items:center;padding:0 10px;background:#2a2a2a;border-bottom:1px solid var(--line)}
+button{background:#3a3a3a;color:var(--txt);border:1px solid #505050;border-radius:3px;padding:4px 9px;cursor:pointer}button:hover{border-color:var(--acc)}button.p{background:var(--acc);color:#001;border:0}
+#left{grid-area:left}#view{grid-area:view;display:flex;flex-direction:column;background:#111}#right{grid-area:right;display:flex;flex-direction:column}#tl{grid-area:tl;position:relative}
+video{flex:1;min-height:0;width:100%;background:#000}
+.item{padding:5px 10px;cursor:pointer;border-bottom:1px solid #2d2d2d}.item:hover{background:#333}.cat{padding:4px 8px;color:var(--acc);font-weight:600}
+#ctl{padding:8px;border-bottom:1px solid var(--line)}#ctl label{display:flex;justify-content:space-between;margin-top:6px;color:var(--dim)}#ctl input[type=range]{width:100%}
+.fx{background:#2f2f2f;margin:6px 0;padding:6px;border-radius:3px}.fx b{color:var(--txt)}
+#chat{flex:1;display:flex;flex-direction:column;min-height:160px}#log{flex:1;overflow:auto;padding:8px}.m{margin:5px 0;padding:5px 7px;border-radius:4px;background:#303030;white-space:pre-wrap}.m.u{background:#25405c}
+#chat form{display:flex;gap:4px;padding:6px}#chat input{flex:1;background:#1b1b1b;border:1px solid var(--line);color:var(--txt);padding:5px;border-radius:3px}
+#ruler{height:20px;margin-left:140px;position:relative;border-bottom:1px solid var(--line);color:var(--dim);font-size:10px}#ruler span{position:absolute;top:4px;border-left:1px solid var(--line);padding-left:2px;height:16px}
+.row{display:flex;height:30px;border-bottom:1px solid #2f2f2f}.name{width:140px;flex:none;padding:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-right:1px solid var(--line);position:sticky;left:0;background:var(--panel);z-index:1}
+.lane{position:relative;flex:1}.clip{position:absolute;top:3px;height:24px;border-radius:3px;background:var(--clip);padding:4px 5px;overflow:hidden;white-space:nowrap;cursor:grab;border:1px solid transparent}
+.clip.audio{background:var(--aud)}.clip.text{background:var(--txtc)}.clip.sel{border-color:#fff}
+#ph{position:absolute;top:0;bottom:0;width:2px;background:#ff4d4d;left:140px;pointer-events:none;z-index:3}
+#status{color:var(--dim);margin-left:auto}
+</style></head><body>
+<div id="top"><b>KLZ</b><button id="imp">Importar mídia</button><input type="file" id="file" hidden>
+<button id="prev" class="p">▶ Renderizar prévia</button><button id="final">Exportar final</button><button id="split">✂ Cortar no playhead</button>
+<button id="del">Excluir camada</button><button id="dub">🎙 Dublar PT→EN</button><span id="status"></span></div>
+<div id="left" class="panel"><h4>Projeto</h4><div id="assets"></div><h4>Efeitos e predefinições</h4><div id="fxlist"></div></div>
+<div id="view"><video id="v" controls></video></div>
+<div id="right" class="panel"><h4>Controles de efeito</h4><div id="ctl"><i style="color:var(--dim)">Selecione uma camada</i></div>
+<div id="chat"><h4>Agente de edição</h4><div id="log"></div><form id="f"><input id="msg" placeholder="ex: corta os primeiros 3s e põe vinheta"><button class="p">Enviar</button></form></div></div>
+<div id="tl" class="panel"><h4>Timeline</h4><div id="ruler"></div><div id="rows"></div><div id="ph"></div></div>
+<script>
+const NAME='main';let proj,fx,sel=null,PPS=60,$=s=>document.querySelector(s);
+const api=(u,o)=>fetch(`/api/projects/${NAME}${u}`,o).then(async r=>{if(!r.ok)throw new Error((await r.json()).detail||r.statusText);return r.json()});
+const st=t=>$('#status').textContent=t;
+async function save(){await api('',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(proj)})}
+async function init(){fx=await fetch('/api/effects').then(r=>r.json());proj=await api('');draw()}
+function draw(){
+ $('#assets').innerHTML=Object.entries(proj.assets).map(([id,a])=>`<div class="item" data-a="${id}">🎞 ${a.name} <small>${a.duration.toFixed(1)}s</small></div>`).join('')||'<div class="item" style="color:var(--dim)">Importe um vídeo</div>';
+ document.querySelectorAll('[data-a]').forEach(e=>e.onclick=async()=>{const a=proj.assets[e.dataset.a];proj.layers.push({id:'l_'+Math.random().toString(16).slice(2,8),name:a.name,type:a.has_video?'video':'audio',asset:e.dataset.a,start:playT(),in:0,out:a.duration,effects:[],opacity:1,volume:1,x:0,y:0,scale:1});await save();draw()});
+ let h='',last='';for(const [k,v] of Object.entries(fx)){if(v.category!=last){h+=`<div class="cat">${v.category}</div>`;last=v.category}h+=`<div class="item" data-fx="${k}">✨ ${v.label}</div>`}
+ $('#fxlist').innerHTML=h;document.querySelectorAll('[data-fx]').forEach(e=>e.onclick=()=>addFx(e.dataset.fx));
+ const end=Math.max(10,...proj.layers.map(l=>l.start+l.out-l.in))+2;$('#ruler').innerHTML=Array.from({length:Math.ceil(end/2)},(_,i)=>`<span style="left:${i*2*PPS}px">${i*2}s</span>`).join('');
+ $('#rows').innerHTML=proj.layers.map(l=>`<div class="row"><div class="name">${l.name}</div><div class="lane" style="min-width:${end*PPS}px"><div class="clip ${l.type} ${l.id==sel?'sel':''}" data-l="${l.id}" style="left:${l.start*PPS}px;width:${(l.out-l.in)*PPS}px">${l.effects.length?'fx ':''}${l.name}</div></div></div>`).join('');
+ document.querySelectorAll('.clip').forEach(c=>{c.onmousedown=e=>{sel=c.dataset.l;const l=proj.layers.find(x=>x.id==sel),x0=e.clientX,s0=l.start;
+  const mv=e2=>{l.start=Math.max(0,s0+(e2.clientX-x0)/PPS);c.style.left=l.start*PPS+'px'};const up=()=>{removeEventListener('mousemove',mv);removeEventListener('mouseup',up);save();draw()};addEventListener('mousemove',mv);addEventListener('mouseup',up);draw()}});
+ ctl()}
+function ctl(){const l=proj.layers.find(x=>x.id==sel);if(!l){$('#ctl').innerHTML='<i style="color:var(--dim)">Selecione uma camada</i>';return}
+ let h=`<b>${l.name}</b><label>Opacidade <span>${l.opacity}</span></label><input type=range min=0 max=1 step=.05 value=${l.opacity} data-p=opacity><label>Volume <span>${l.volume}</span></label><input type=range min=0 max=2 step=.05 value=${l.volume} data-p=volume>`;
+ l.effects.forEach((e,i)=>{const d=fx[e.type];h+=`<div class="fx"><b>${d.label}</b> <button data-rm=${i} style="float:right">✕</button>`;
+  for(const [n,s] of Object.entries(d.params)){const v=e.params[n]??s.default;h+=`<label>${s.label}<span>${v}</span></label><input type=range min=${s.min} max=${s.max} step=${(s.max-s.min)/200} value=${v} data-e=${i} data-n=${n}>`}h+='</div>'});
+ $('#ctl').innerHTML=h;
+ $('#ctl').querySelectorAll('[data-p]').forEach(i=>i.oninput=()=>{l[i.dataset.p]=+i.value;i.previousSibling.lastChild.textContent=i.value;save()});
+ $('#ctl').querySelectorAll('[data-e]').forEach(i=>i.oninput=()=>{l.effects[i.dataset.e].params[i.dataset.n]=+i.value;i.previousSibling.lastChild.textContent=(+i.value).toFixed(3);save()});
+ $('#ctl').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{l.effects.splice(b.dataset.rm,1);save();draw()})}
+function addFx(t){const l=proj.layers.find(x=>x.id==sel);if(!l)return st('Selecione uma camada primeiro');l.effects.push({type:t,params:{}});save();draw()}
+const playT=()=>$('#v').currentTime||0;
+$('#v').ontimeupdate=()=>{$('#ph').style.left=140+playT()*PPS+'px'};
+async function call(u,b){st('Processando…');try{const r=await api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(r.project)proj=r.project;draw();st('');return r}catch(e){st('Erro: '+e.message);throw e}}
+$('#imp').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{const fd=new FormData();fd.append('file',e.target.files[0]);st('Enviando…');const r=await api('/upload',{method:'POST',body:fd});proj=r.project;draw();st('')};
+$('#prev').onclick=async()=>{st('Renderizando…');try{const r=await api('/render?preview=true',{method:'POST'});const t=playT();$('#v').src=r.url+'&t='+Date.now();$('#v').currentTime=t;st('')}catch(e){st('Erro: '+e.message)}};
+$('#final').onclick=async()=>{st('Exportando…');try{const r=await api('/render?preview=false',{method:'POST'});st('');open(r.url)}catch(e){st('Erro: '+e.message)}};
+$('#split').onclick=async()=>{const l=proj.layers.find(x=>x.id==sel);if(!l)return st('Selecione uma camada');const t=playT(),rel=t-l.start;
+ if(rel<=0||rel>=l.out-l.in)return st('Playhead fora da camada');const r=JSON.parse(JSON.stringify(l));r.id='l_'+Math.random().toString(16).slice(2,8);r.in=l.in+rel;r.start=t;l.out=l.in+rel;proj.layers.push(r);await save();draw()};
+$('#del').onclick=async()=>{proj.layers=proj.layers.filter(l=>l.id!=sel);sel=null;await save();draw()};
+$('#dub').onclick=async()=>{const l=proj.layers.find(x=>x.id==sel);if(!l)return st('Selecione a camada a dublar');await api('/dub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({layer_id:l.id})});
+ const t=setInterval(async()=>{const s=(await api('/dub/status')).status;st('Dublagem: '+s);if(s=='done'||s.startsWith('erro')){clearInterval(t);if(s=='done'){proj=await api('');draw()}}},1500)};
+$('#f').onsubmit=async e=>{e.preventDefault();const m=$('#msg').value.trim();if(!m)return;$('#msg').value='';log(m,'u');try{const r=await call('/chat',{message:m});log(r.reply||'(feito)')}catch(err){log(err.message)}};
+function log(t,c=''){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('#log').append(d);$('#log').scrollTop=1e9}
+init();
+</script></body></html>
