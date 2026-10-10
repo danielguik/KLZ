@@ -139,7 +139,7 @@ def compile_layers(proj):
                   "trimStart": 0, "volume": proj["mix"]["background"], "rate": 1})
     if proj.get("cover_old_subs"):
         L.append({"id": "cover", "auto": True, "name": "Vidro (cobre legenda antiga)", "type": "glass", "start": 0, "duration": D, "enter": False,
-                  "x": 0.03, "y": 0.695, "w": 0.94, "h": 0.215, "radius": 36, "blur": 34, "tint": "rgba(10,10,14,0.5)", "borderColor": "rgba(255,255,255,0.45)"})
+                  "x": 0.03, "y": 0.66, "w": 0.94, "h": 0.25, "radius": 36, "blur": 60, "tint": "rgba(10,10,14,0.97)", "borderColor": "rgba(255,255,255,0.45)"})
     for ph in proj["phrases"]:
         a = ph.get("audio")
         if a:
@@ -148,7 +148,8 @@ def compile_layers(proj):
                       "volume": proj["mix"]["voice"], "rate": ph.get("rate", 1)})
     for u in keep:
         if u.get("link") == "base" and "src" in u: u["src"] = base  # cartão de vídeo sempre acompanha o vídeo com lip-sync
-    proj["layers"] = L + keep + [captions_layer(proj)]
+    cover = [l for l in L if l["id"] == "cover"]  # o vidro fica ACIMA dos recortes (que carregam a legenda antiga queimada)
+    proj["layers"] = [l for l in L if l["id"] != "cover"] + keep + cover + [captions_layer(proj)]
 
 def phrase_words(ph, idx):
     toks = (ph.get("en") or "").split()

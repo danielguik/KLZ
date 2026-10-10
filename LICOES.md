@@ -37,3 +37,9 @@
 - Recorte de vídeo em cartão: objectFit cover + objectPosition (foco) + transform scale(zoom) com transformOrigin no foco. Mover o elemento (left/top) deixa faixa preta.
 - Estilo profissional: transição só em mudanças grandes de cena (limiar 0,45, ≥5 s entre elas, máx. 5); cortes rápidos ficam secos. Cartão de vídeo corta as legendas antigas gravadas no original.
 - Lip-sync por falante: escolher a trilha de rosto que realmente fala com ele; unir só trilhas que não aparecem juntas no quadro.
+
+## Texto atrás da pessoa, sincronia labial e vidro
+- `textBehind` = texto + sequência RGBA do recorte (selfie segmentation por pessoa). Usar 1–2 vezes por vídeo.
+- O recorte leva junto a legenda antiga queimada: o vidro que a cobre precisa ficar ACIMA do recorte na ordem das camadas (compile_layers faz isso).
+- Sincronia: janela de movimento da boca (compute_lips) → voz começa no início da boca; duração ajustada por melhor-de-N candidatos XTTS + atempo.
+- Estilo padrão "full": só efeitos sobre o vídeo, sem fundo gerado.
