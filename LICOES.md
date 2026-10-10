@@ -33,3 +33,7 @@
 - XTTS trava (pausas, 10 s p/ 60 caracteres) com letras acentuadas no meio do inglês (Império): tirar acentos do texto falado.
 - Amostra de voz curta (<5 s, ex.: 0,9 s) não clona: usar voz da biblioteca do XTTS (Damien Black…) e avisar; não ligar auto-tom com amostra curta (f0 pouco confiável).
 - Quando o inglês é mais longo que o português, a fala seguinte começa depois do fim da anterior (t0 = max(s, fim_anterior+0,06), deslocamento máx. 1,5 s) em vez de sobrepor.
+- Prévia = Remotion Player (mesmo código do render): evita ter dois renderizadores (canvas x Remotion) e divergência. Empacotar com esbuild (studio: `npm run build:player` -> server/web/player.js). `numberOfSharedAudioTags` alto (muitas camadas de áudio). `onError` no OffthreadVideo para não derrubar a prévia se o navegador não toca H.264. URLs de mídia no player precisam ser ABSOLUTAS (location.origin).
+- Recorte de vídeo em cartão: objectFit cover + objectPosition (foco) + transform scale(zoom) com transformOrigin no foco. Mover o elemento (left/top) deixa faixa preta.
+- Estilo profissional: transição só em mudanças grandes de cena (limiar 0,45, ≥5 s entre elas, máx. 5); cortes rápidos ficam secos. Cartão de vídeo corta as legendas antigas gravadas no original.
+- Lip-sync por falante: escolher a trilha de rosto que realmente fala com ele; unir só trilhas que não aparecem juntas no quadro.

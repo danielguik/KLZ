@@ -12,11 +12,12 @@ bash server/start.sh          # no Mac também: dois cliques em server/start.com
 O terminal mostra os endereços e a senha (`token=…`). **Celular:** mesmo Wi-Fi, abra o endereço "No celular" (ou o botão 📱 Celular na tela, que mostra um QR code). Fora de casa: instale o Tailscale (grátis) no computador e no celular.
 
 **O que ele faz** (cada passo é editável na tela):
-- **Analisar vídeo:** separa a voz do som de fundo (Demucs), transcreve (Whisper), identifica quantas pessoas falam e quem fala cada frase.
+- **Analisar vídeo:** separa a voz do som de fundo (Demucs), transcreve (Whisper) e identifica **quem fala cada palavra olhando a boca de cada rosto + a voz de cada pessoa** (várias pessoas, trocas de voz no meio da frase). As frases quebram a cada troca de falante.
 - **Frases:** tradução editável frase a frase. Mudou o inglês? Aparece o botão **Refazer voz desta frase** (só ela é refeita). Dá para juntar frases, trocar o falante e ver quando o inglês passa do tempo da fala original.
 - **Vozes:** 1 voz por falante (vários falantes por vídeo). Envie um áudio de referência: o app mede o tom (Hz) e clona a voz. Controles de velocidade, expressividade, tom (semitons) e volume; "Calibrar tom" iguala ao tom original.
 - **Lip-sync:** acha os trechos com um rosto falando; você move/redimensiona a caixa no vídeo, muda a força ou desliga, e refaz só aquele trecho.
 - **Áudio:** mixagem voz dublada / fundo sem a voz / original; pronúncia de marcas; cobrir legendas antigas com vidro.
+- **Estilo:** um clique aplica o visual profissional (fundo animado, letreiro, vídeo em cartão com recorte, título, legendas em caixa, transições só nos cortes grandes). **Adicionar** traz mais camadas: texto cinético, gráfico de barras, anel, identificação do falante, seta/legenda, grade 3D, formas, transições, vídeo em cartão, fundo animado. A prévia usa o mesmo motor do render (Remotion Player).
 - **Saída:** renderiza MP4 H.264 no computador (Remotion) e deixa o arquivo disponível para baixar do celular.
 
 **Chaves opcionais** (variáveis de ambiente no computador): `ANTHROPIC_API_KEY` liga a tradução automática; `ELEVENLABS_API_KEY` permite voz de qualidade profissional.
