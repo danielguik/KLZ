@@ -19,6 +19,14 @@ const Enter = z.enum(['pop', 'rise', 'slide', 'fade', 'none']).default('pop').de
 
 export const Layer = z.discriminatedUnion('type', [
   z.object({
+    ...base, type: z.literal('textBehind'),
+    text: z.string(), y: z.number().default(0.3), fontSize: z.number().default(420), fit: z.boolean().default(true).describe('ajusta o tamanho para caber na largura'),
+    color: z.string().default('#ffffff'), accent: z.string().default('#ffb020'), variant: z.enum(['solid', 'outline', 'gradient']).default('solid'),
+    opacity: z.number().min(0).max(1).default(0.95), rise: z.boolean().default(true).describe('entrada com movimento'),
+    cutout: z.string().default('').describe('recorte da pessoa (gerado pelo app)'), cutFps: z.number().default(30), frames: z.number().default(0),
+    brightness: z.number().default(1), contrast: z.number().default(1), saturate: z.number().default(1),
+  }),
+  z.object({
     ...base, type: z.literal('background'),
     style: z.enum(['aurora', 'mesh', 'solid']).default('aurora'),
     c1: z.string().default('#0b0b14'), c2: z.string().default('#5b2bd9'), c3: z.string().default('#ff6a3d'),

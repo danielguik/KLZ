@@ -27,12 +27,14 @@ def analyze(path):
         out["label"] = "grave" if f < 110 else "médio-grave" if f < 150 else "médio" if f < 190 else "agudo"
     return out
 
-def pitch_shift(src, dst, semitones=0.0, gain=1.0):
-    """Muda o tom sem mudar a velocidade (asetrate + atempo) e ajusta o volume."""
+def pitch_shift(src, dst, semitones=0.0, gain=1.0, tempo=1.0):
+    """Muda o tom sem mudar a velocidade (asetrate + atempo), acelera/desacelera sem mudar o tom (tempo) e ajusta o volume."""
     f = 2 ** (semitones / 12.0)
     flt = []
     if abs(semitones) > 0.01:
         flt += [f"asetrate=24000*{f:.5f}", "aresample=24000", f"atempo={1 / f:.5f}"]
+    if abs(tempo - 1) > 0.005:
+        flt.append(f"atempo={tempo:.4f}")
     if abs(gain - 1) > 0.01:
         flt.append(f"volume={gain:.3f}")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src)]

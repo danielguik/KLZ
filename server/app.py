@@ -218,8 +218,25 @@ def ls_run(pid: str, b: Ids):
 def ls_compose(pid: str):
     proj_or_404(pid); return jobs.submit("compose", pid, lambda pr: pipeline.compose_base(pid), "Recompor vídeo com lip-sync")
 
+@app.post("/api/projects/{pid}/layers/{lid}/cutout", dependencies=[Depends(auth)])
+def layer_cutout(pid: str, lid: str):
+    proj_or_404(pid)
+    return jobs.submit("cutout", pid, lambda pr: pipeline.make_cutout(pid, lid, pr), "Recortar a pessoa (texto atrás)")
+
+@app.post("/api/projects/{pid}/lips", dependencies=[Depends(auth)])
+def lips(pid: str):
+    """Recalcula quando a boca de cada falante se mexe em cada frase (para alinhar a voz) e devolve o erro de sincronia."""
+    proj_or_404(pid)
+    def run(pr):
+        def fn(p):
+            pipeline.refresh_phrase_layers(p)
+        pr_ = store.update(pid, fn)
+        return pipeline.sync_report(pr_)
+    return jobs.submit("lips", pid, run, "Medir sincronia com a leitura labial")
+
 class StyleReq(BaseModel):
-    preset: str = "card"
+    preset: str = "full"
+    transitions: bool = False
     title: str = ""
     tag: str = ""
     words: list[str] | None = None
@@ -228,7 +245,7 @@ class StyleReq(BaseModel):
 @app.post("/api/projects/{pid}/style", dependencies=[Depends(auth)])
 def apply_style_route(pid: str, b: StyleReq):
     proj_or_404(pid)
-    return jobs.submit("style", pid, lambda pr: pipeline.apply_style(pid, b.preset, b.title, b.tag, b.words, pr, b.end), "Aplicar visual profissional")
+    return jobs.submit("style", pid, lambda pr: pipeline.apply_style(pid, b.preset, b.title, b.tag, b.words, pr, b.end, b.transitions), "Aplicar visual profissional")
 
 class RenderReq(BaseModel):
     scale: float = 0.75

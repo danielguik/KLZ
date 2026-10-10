@@ -2,7 +2,7 @@
 /* Motor de preview/edição: desenha as camadas num canvas (mesma aparência do render), toca áudio, timeline arrastável. */
 const $=(s,e=document)=>e.querySelector(s);
 const W=1080,H=1920;
-const TYPES={video:'Vídeo',audio:'Áudio',captions:'Legendas',glass:'Vidro',title:'Título',stat:'Número',floatingWords:'Palavras flutuantes',flash:'Flash',background:'Fundo animado',videoCard:'Vídeo em cartão',kinetic:'Texto cinético',barchart:'Gráfico de barras',ring:'Anel',lowerthird:'Identificação',callout:'Seta/legenda',grid3d:'Grade 3D',shape:'Forma',transition:'Transição'};
+const TYPES={video:'Vídeo',audio:'Áudio',captions:'Legendas',glass:'Vidro',title:'Título',stat:'Número',floatingWords:'Palavras flutuantes',flash:'Flash',textBehind:'Texto atrás da pessoa',background:'Fundo animado',videoCard:'Vídeo em cartão',kinetic:'Texto cinético',barchart:'Gráfico de barras',ring:'Anel',lowerthird:'Identificação',callout:'Seta/legenda',grid3d:'Grade 3D',shape:'Forma',transition:'Transição'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const rid=()=>'l'+Math.random().toString(36).slice(2,7);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -42,7 +42,7 @@ function recalcDur(){const e=Math.max(...LAY().map(layerEnd),1);if(e>PROJ.durati
 /* ---------- prévia = player do Remotion (mesmo código do render final) ---------- */
 let PLAYER=null,capCache={};
 function ensurePlayer(){if(!PLAYER&&window.KLZPlayer)PLAYER=KLZPlayer.mount($('#pl'));return PLAYER}
-function playerProps(){return{fps:PROJ.fps||30,width:PROJ.width||1080,height:PROJ.height||1920,durationSec:PROJ.durationSec,layers:PROJ.layers.map(l=>l.src?{...l,src:location.origin+mediaUrl(l.src)}:l)}}
+function playerProps(){return{fps:PROJ.fps||30,width:PROJ.width||1080,height:PROJ.height||1920,durationSec:PROJ.durationSec,layers:PROJ.layers.map(l=>{let o=l;if(l.src)o={...o,src:location.origin+mediaUrl(l.src)};if(l.cutout&&l.frames)o={...o,cutout:location.origin+mediaUrl(l.cutout+'/{n}.png')};else if(l.cutout)o={...o,cutout:''};return o})}}
 let rafPending=false;
 function refreshPlayer(){
   if(rafPending||!PROJ)return;rafPending=true;

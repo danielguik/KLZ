@@ -7,6 +7,7 @@ import {AudioLayer, VideoLayer} from './layers/VideoLayer';
 import {Captions} from './layers/Captions';
 import {FloatingWords, Flash, Glass, Stat, Title} from './layers/Graphics';
 import {Background} from './layers/Background';
+import {TextBehind} from './layers/TextBehind';
 import {VideoCard} from './layers/VideoCard';
 import {Kinetic} from './layers/Kinetic';
 import {BarChart, Ring} from './layers/Charts';
@@ -27,6 +28,7 @@ export const Reel: React.FC<ProjectT> = ({layers}) => {
           {l.type === 'stat' && <Stat l={l} />}
           {l.type === 'floatingWords' && <FloatingWords l={l} />}
           {l.type === 'flash' && <Flash l={l} />}
+          {l.type === 'textBehind' && <TextBehind l={l} />}
           {l.type === 'background' && <Background l={l} />}
           {l.type === 'videoCard' && <VideoCard l={l} />}
           {l.type === 'kinetic' && <Kinetic l={l} />}

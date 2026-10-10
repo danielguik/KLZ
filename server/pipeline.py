@@ -5,7 +5,8 @@ from pathlib import Path
 import numpy as np, soundfile as sf
 from . import store
 from .config import STUDIO, W2L_DIR
-from .engines import asr, diar, separate, tts, voiceprint, translate, lipsync, avdiar
+from .engines import asr, diar, separate, tts, voiceprint, translate, lipsync, avdiar, matte
+from .engines import faces as faces_mod
 
 COLORS = ["#4da3ff", "#ffb020", "#4cc38a", "#ff6b9a", "#b58bff", "#ff8a4c"]
 KEYS = set("hopedale massachusetts celsius snow sunshine beautiful led sensor exclusive minimalist recessed handle unlocking available".split())
@@ -118,8 +119,9 @@ def place(proj, max_shift=1.5, gap=0.06):
     """Posição real (t0) de cada fala: começa no instante original, mas nunca antes do fim da fala anterior (o inglês costuma ser mais longo)."""
     prev_end = 0.0
     for ph in proj["phrases"]:
-        t0 = max(ph["s"], prev_end + gap) if prev_end else ph["s"]
-        t0 = min(t0, ph["s"] + max_shift)
+        base = ph["lip"]["on"] if ph.get("lip") else ph["s"]       # com rosto visível: a fala começa quando a boca começa
+        t0 = max(base, prev_end + gap) if prev_end else base
+        t0 = min(t0, base + max_shift)
         ph["t0"] = round(t0, 3)
         prev_end = t0 + (ph["dur"] / max(ph.get("rate", 1), .01) if ph.get("audio") else (ph["e"] - ph["s"]))
 
@@ -137,7 +139,7 @@ def compile_layers(proj):
                   "trimStart": 0, "volume": proj["mix"]["background"], "rate": 1})
     if proj.get("cover_old_subs"):
         L.append({"id": "cover", "auto": True, "name": "Vidro (cobre legenda antiga)", "type": "glass", "start": 0, "duration": D, "enter": False,
-                  "x": 0.03, "y": 0.725, "w": 0.94, "h": 0.17, "radius": 36, "blur": 34, "tint": "rgba(10,10,14,0.5)", "borderColor": "rgba(255,255,255,0.45)"})
+                  "x": 0.03, "y": 0.695, "w": 0.94, "h": 0.215, "radius": 36, "blur": 34, "tint": "rgba(10,10,14,0.5)", "borderColor": "rgba(255,255,255,0.45)"})
     for ph in proj["phrases"]:
         a = ph.get("audio")
         if a:
@@ -173,12 +175,90 @@ def captions_layer(proj):
 def refresh_phrase_layers(proj):
     """Atualiza áudio e legendas das frases sem mexer em camadas do usuário."""
     old = {l["id"]: l for l in proj["layers"]}
+    compute_lips(proj["id"], proj)
     compile_layers(proj)
     for l in proj["layers"]:  # preserva ajustes manuais (volume etc.) das camadas automáticas
         o = old.get(l["id"])
         if o and l.get("auto") and l["type"] in ("audio", "video", "glass"):
             for k in ("volume", "brightness", "contrast", "saturate", "zoomPunches", "x", "y", "w", "h", "blur", "tint", "radius", "borderColor"):
                 if k in o: l[k] = o[k]
+
+# ---------------------------------------------------------------- sincronia com a leitura labial
+LIP_THR = 0.020   # atividade da boca (desvio do MAR em ~0,24 s) a partir da qual a pessoa está falando
+
+def compute_lips(pid, proj=None):
+    """Para cada frase com o rosto do falante visível, mede QUANDO a boca começa e termina de se mexer (ph['lip'] = {on, off}).
+    A voz em inglês é então colocada nessa janela. Sem rosto visível, a frase usa o tempo da transcrição."""
+    proj = proj or store.load(pid); d = P(pid); fc = d / "audio" / "faces.json"
+    for ph in proj["phrases"]: ph.pop("lip", None)
+    if not fc.exists() or not proj.get("face_groups"): return proj
+    frames = [(t, fs) for t, fs in json.loads(fc.read_text())]
+    if len(frames) < 10: return proj
+    W = (proj.get("native") or [1080])[0]; st = frames[1][0] - frames[0][0]
+    chains = faces_mod.tracks(frames, W, st); times = np.array([t for t, _ in frames]); n = len(times)
+    k = max(1, int(round(0.12 / st))); act = {}
+    for ci, c in enumerate(chains):
+        ap = np.full(n, np.nan)
+        for i, f in c["pts"].items(): ap[i] = f["mar"]
+        a = np.full(n, np.nan)
+        for i in range(n):
+            win = ap[max(0, i - k): i + k + 1]; win = win[~np.isnan(win)]
+            if len(win) >= 3: a[i] = win.std()
+        act[ci] = a
+    # qual rosto é de qual falante: o rosto cuja boca se mexe mais quando AQUELE falante fala (do que quando ele não fala)
+    owner = {}
+    for ci, a in act.items():
+        best, bs = None, 0.008
+        for spk in proj["speakers"]:
+            sp_on = np.array([any(p["speaker"] == spk["id"] and p["s"] <= t <= p["e"] for p in proj["phrases"]) for t in times])
+            on_v = a[sp_on & ~np.isnan(a)]; off_v = a[~sp_on & ~np.isnan(a)]
+            if len(on_v) < 5: continue
+            base = float(np.mean(off_v)) if len(off_v) >= 5 else 0.008
+            sc = float(np.mean(on_v)) - base
+            if sc > bs: best, bs = spk["id"], sc
+        if best: owner[ci] = best
+    groups = {}
+    for ci, sid in owner.items(): groups.setdefault(sid, []).append(int(ci))
+    proj["face_groups"] = groups
+    need = max(2, int(round(0.2 / st)))
+    for ph in proj["phrases"]:
+        lo, hi = ph["s"] - 0.4, ph["e"] + 0.5
+        idx = np.where((times >= lo) & (times <= hi))[0]
+        if len(idx) < 5: continue
+        best = None
+        for ci in proj["face_groups"].get(ph["speaker"], []):
+            a = act.get(ci)
+            if a is None: continue
+            seg = a[idx]; vis = ~np.isnan(seg)
+            if vis.mean() < 0.6: continue
+            sc = float(np.nanmean(seg))
+            if best is None or sc > best[0]: best = (sc, ci)
+        if not best: continue
+        seg = act[best[1]][idx]; on = np.nan_to_num(seg, nan=0.0) >= LIP_THR
+        runs, i = [], 0
+        while i < len(on):
+            if on[i]:
+                j = i
+                while j + 1 < len(on) and (on[j + 1] or (j + 2 < len(on) and on[j + 2])): j += 1   # tolera uma amostra caída
+                if j - i + 1 >= need: runs.append((i, j))
+                i = j + 1
+            else: i += 1
+        if not runs: continue
+        a0, a1 = times[idx[runs[0][0]]], times[idx[runs[-1][1]]] + st
+        L, A = a1 - a0, ph["e"] - ph["s"]
+        if 0.6 * A <= L <= 1.5 * A and abs(a0 - ph["s"]) <= 0.7:   # só aceita se for coerente com a transcrição
+            ph["lip"] = {"on": round(float(a0), 2), "off": round(float(a1), 2), "chain": int(best[1])}
+    return proj
+
+def sync_report(proj):
+    """Erro de sincronia: onde a voz em inglês começa/termina em relação à janela em que a boca realmente se mexe."""
+    rows = []
+    for ph in proj["phrases"]:
+        if not ph.get("lip") or not ph.get("audio"): continue
+        t0 = ph.get("t0", ph["s"]); end = t0 + ph["dur"] / max(ph.get("rate", 1), 0.01)
+        rows.append({"id": ph["id"], "on_err": round(t0 - ph["lip"]["on"], 2), "off_err": round(end - ph["lip"]["off"], 2)})
+    if not rows: return {"n": 0}
+    return {"n": len(rows), "mean_on": round(float(np.mean([abs(r["on_err"]) for r in rows])), 2), "mean_off": round(float(np.mean([abs(r["off_err"]) for r in rows])), 2), "rows": rows}
 
 # ---------------------------------------------------------------- falantes (voz + boca)
 def analyze_speakers(pid, segs, voc16, n_speakers, glossary, progress):
@@ -266,8 +346,8 @@ def translate_all(pid, ids=None, progress=lambda m: None):
     return {"translated": len(res)}
 
 # ---------------------------------------------------------------- voz por frase
-def _params_hash(v, say):
-    return hashlib.md5(("v3|" + say + json.dumps(v["params"], sort_keys=True) + v["id"] + v["ref"] + str(v.get("builtin"))).encode()).hexdigest()[:10]
+def _params_hash(v, say, target=0.0):
+    return hashlib.md5(("v5|" + say + json.dumps(v["params"], sort_keys=True) + v["id"] + v["ref"] + str(v.get("builtin")) + f"|{target:.1f}").encode()).hexdigest()[:10]
 
 def say_text(proj, text):
     import unicodedata
@@ -281,29 +361,42 @@ def voice_phrase(pid, ph_id, progress=lambda m: None):
     i = next(k for k, p in enumerate(proj["phrases"]) if p["id"] == ph_id); ph = proj["phrases"][i]
     spk = next(s for s in proj["speakers"] if s["id"] == ph["speaker"]); v = next(x for x in proj["voices"] if x["id"] == spk["voice"])
     if not ph.get("en", "").strip(): raise RuntimeError(f"A frase {ph_id} está sem tradução.")
-    say = say_text(proj, ph["en"]); h = _params_hash(v, say)
+    say = say_text(proj, ph["en"])
     nxt = proj["phrases"][i + 1]["s"] if i + 1 < len(proj["phrases"]) else ph["e"] + 2.0
-    slot = max(nxt - ph["s"] - 0.05, ph["e"] - ph["s"])
+    lip = ph.get("lip")
+    slot = (lip["off"] - lip["on"]) if lip else max(nxt - ph["s"] - 0.05, ph["e"] - ph["s"])   # com boca visível: cabe na janela dos lábios
+    h = _params_hash(v, say, slot if lip else 0.0)
     raw = d / "dub" / f"{ph_id}_{h}_raw.wav"; out = d / "dub" / f"{ph_id}_{h}.wav"
     pr = v["params"]
     if not out.exists():
         progress(f"Gerando a voz da frase {ph_id} ({spk['name']})…")
-        speed = pr["speed"]; trimmed = d / "dub" / f"{ph_id}_{h}_trim.wav"
-        for _ in range(3):  # se passar do tempo da fala original, acelera um pouco (até 1.35x)
-            tts.synth(say, d / v["ref"], raw, speed=speed, temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"), builtin=v.get("builtin"))
-            voiceprint.trim_silence(raw, trimmed); dd = tts.duration(trimmed)
-            if dd <= slot * 1.03 or speed >= 1.35: break
-            speed = min(speed * dd / slot, 1.35)
-        raw.unlink(missing_ok=True); raw = trimmed
+        base = pr["speed"]; cand = None
+        # o XTTS varia muito de uma geração para outra: gera até 3-4 candidatos e fica com o que mais se aproxima da janela-alvo
+        speeds = [base, base * 1.2, base * 1.35, base * 1.35] if lip else [base, base * 1.2, base * 1.35]
+        for n_try, sp in enumerate(speeds):
+            r_ = d / "dub" / f"{ph_id}_{h}_raw{n_try}.wav"; t_ = d / "dub" / f"{ph_id}_{h}_trim{n_try}.wav"
+            tts.synth(say, d / v["ref"], r_, speed=min(sp, 1.5), temperature=pr["temperature"], engine=v["engine"], voice_id=v.get("voice_id"), builtin=v.get("builtin"))
+            voiceprint.trim_silence(r_, t_); r_.unlink(missing_ok=True); dd0 = tts.duration(t_); f0 = dd0 / slot
+            score = abs(float(np.log(f0))) + (0.4 if f0 > 1.4 else 0.0)
+            if cand is None or score < cand[0]:
+                if cand: cand[1].unlink(missing_ok=True)
+                cand = (score, t_, dd0)
+            else: t_.unlink(missing_ok=True)
+            if 0.88 <= f0 <= 1.06: break
+        _, raw, dd0 = cand
+        f = dd0 / slot
+        # ajuste final SEM mudar o tom (atempo): encaixa na janela da boca (0.85x–1.4x) ou, sem rosto, só acelera (até 1.3x)
+        tempo = float(np.clip(f, 0.85, 1.4)) if lip else (float(np.clip(f, 1.0, 1.3)) if f > 1.04 else 1.0)
         semis = pr.get("pitch", 0.0)
         if pr.get("auto_pitch") and v["analysis"].get("f0"): semis += voiceprint.match_semitones(v["analysis"]["f0"], raw)
-        voiceprint.pitch_shift(raw, out, semis, pr.get("gain", 1.0)); raw.unlink(missing_ok=True)
+        voiceprint.pitch_shift(raw, out, semis, pr.get("gain", 1.0), tempo=tempo)
+        for k_ in (d / "dub").glob(f"{ph_id}_{h}_trim*.wav"): k_.unlink(missing_ok=True)
     dd = tts.duration(out)
     def fn(p):
         q = p["phrases"][i]
-        q.update({"audio": f"dub/{out.name}", "dur": round(dd, 3), "rate": round(max(1.0, min(dd / slot, 1.15)), 3) if dd > slot else 1.0,
+        q.update({"audio": f"dub/{out.name}", "dur": round(dd, 3), "rate": 1.0,
                   "voiced": {"en": ph["en"], "hash": h, "voice": v["id"]}, "status": "ok",
-                  "overflow": round(max(0.0, dd / (round(max(1.0, min(dd / slot, 1.15)), 3) if dd > slot else 1.0) - slot), 2)})
+                  "overflow": round(max(0.0, dd - slot), 2)})
         refresh_phrase_layers(p)
     store.update(pid, fn)
     return out.name
@@ -315,7 +408,7 @@ def stale_ids(proj):
         spk = next((s for s in proj["speakers"] if s["id"] == ph["speaker"]), None)
         v = next((x for x in proj["voices"] if spk and x["id"] == spk["voice"]), None)
         if not v: continue
-        cur = _params_hash(v, say_text(proj, ph["en"]))
+        cur = _params_hash(v, say_text(proj, ph["en"]), (ph["lip"]["off"] - ph["lip"]["on"]) if ph.get("lip") else 0.0)
         if not ph.get("audio") or not ph.get("voiced") or ph["voiced"].get("hash") != cur: out.append(ph["id"])
     return out
 
@@ -394,7 +487,7 @@ def detect_cuts(video, thr=0.35):
     r = subprocess.run(["ffmpeg", "-i", str(video), "-vf", f"select='gt(scene,{thr})',showinfo", "-f", "null", "-"], capture_output=True, text=True).stderr
     return [float(m) for m in re.findall(r"pts_time:([0-9.]+)", r)]
 
-def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambda m: None, end=None):
+def apply_style(pid, preset="full", title="", tag="", words=None, progress=lambda m: None, end=None, transitions=False):
     """Aplica um visual profissional: fundo animado + letreiro + vídeo em cartão + título + legendas abaixo + transições nos cortes.
     As camadas criadas ficam marcadas (preset) e são substituídas ao aplicar de novo; as suas camadas não são tocadas."""
     proj = store.load(pid); d = P(pid); media = d / proj["media"]; D = proj["durationSec"]
@@ -408,7 +501,7 @@ def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambd
     def mk(**k):
         k.update({"id": "s_" + uuid_hex(), "preset": preset, "auto": False}); return k
     S = []
-    if preset == "card":
+    if preset == "card":   # opcional (o padrão agora é 'full': só efeitos por cima do vídeo)
         ws = [w.strip() for w in (words or []) if w.strip()] or ([title] if title else [proj.get("name", "KLZ")])
         S += [mk(name="Fundo animado", type="background", start=0, duration=E, style="aurora", c1="#0a0a14", c2="#5b2bd9", c3="#ff6a3d", speed=1, grain=0.2, vignette=0.6),
               mk(name="Letreiro", type="kinetic", start=0, duration=E, mode="marquee", words=ws, fontSize=170, y=0.42, color="#ffffff", accent="#ffb020", outline=True, speed=1, rotate=-8, opacity=0.14),
@@ -416,7 +509,7 @@ def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambd
                  shape="rounded", radius=56, borderColor="rgba(255,255,255,0.4)", borderWidth=3, glow="rgba(124,92,255,0.5)", zoom=1, focusX=0.5, focusY=0.32, enter="rise")]
     if title:
         S.append(mk(name="Título", type="title", start=0.4, duration=min(4.0, D), text=title, tag=tag, y=0.07 if preset == "card" else 0.1, fontSize=108, color="#ffffff", accent="#ffb020", accentLast=True))
-    for i, c in enumerate(cuts[:8]):
+    for i, c in enumerate(cuts[:8] if transitions else []):
         S.append(mk(name=f"Transição {i + 1}", type="transition", start=round(max(0, c - 0.45), 2), duration=0.9, kind=["wipe", "bars"][i % 2], color="#7c5cff", color2="#ffb020"))
     if E < D - 0.5:
         S.append(mk(name="Transição final", type="transition", start=round(max(0, E - 0.45), 2), duration=0.9, kind="wipe", color="#7c5cff", color2="#ffb020"))
@@ -425,7 +518,7 @@ def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambd
         for l in old:
             if l.get("id") == "cap":
                 l.update({"y": 0.9, "variant": "box", "fontSize": 66} if preset == "card" else {"y": 0.81, "variant": "pop", "fontSize": 70})
-        p["cover_old_subs"] = preset != "card"
+        p["cover_old_subs"] = preset != "card"   # tela cheia: o vidro esconde as legendas antigas gravadas no original
         auto = [l for l in old if l.get("auto")]; user = [l for l in old if not l.get("auto")]
         p["layers"] = auto + S + user
         compile_layers(p)
@@ -435,12 +528,31 @@ def apply_style(pid, preset="card", title="", tag="", words=None, progress=lambd
 def uuid_hex():
     import uuid; return uuid.uuid4().hex[:6]
 
+# ---------------------------------------------------------------- texto atrás da pessoa
+def make_cutout(pid, layer_id, progress=lambda m: None):
+    """Gera os PNGs com transparência da(s) pessoa(s) durante a camada 'textBehind' (a pessoa fica por cima do texto)."""
+    proj = store.load(pid); d = P(pid)
+    l = next((x for x in proj["layers"] if x["id"] == layer_id), None)
+    if not l or l.get("type") != "textBehind": raise RuntimeError("Camada de texto atrás da pessoa não encontrada.")
+    base = d / "media" / "base.mp4"; video = base if base.exists() else d / proj["media"]
+    fc = d / "audio" / "faces.json"
+    frames = [(t, fs) for t, fs in json.loads(fc.read_text())] if fc.exists() else None
+    out = d / "matte" / layer_id
+    if out.exists(): shutil.rmtree(out)
+    n = matte.make_cutouts(video, out, l["start"], l["start"] + l["duration"], frames, progress=progress)
+    def fn(p):
+        x = next(y for y in p["layers"] if y["id"] == layer_id)
+        x.update({"cutout": f"matte/{layer_id}", "frames": n, "cutFps": 30, "cutRange": [x["start"], x["duration"]]})
+    store.update(pid, fn)
+    return {"frames": n}
+
 # ---------------------------------------------------------------- render
 def render(pid, scale=0.75, crf=18, base_url="http://127.0.0.1:8000", token="", progress=lambda m: None):
     proj = store.load(pid); d = P(pid)
     layers = json.loads(json.dumps(proj["layers"]))
     for l in layers:
         if "src" in l: l["src"] = f"{base_url}/api/projects/{pid}/files/{l['src'].split('?')[0]}?token={token}"
+        if l.get("cutout"): l["cutout"] = f"{base_url}/api/projects/{pid}/files/{l['cutout']}/{{n}}.png?token={token}"
     props = {"fps": proj["fps"], "width": proj["width"], "height": proj["height"], "durationSec": proj["durationSec"], "layers": layers}
     pj = d / "render" / "props.json"; pj.write_text(json.dumps(props, ensure_ascii=False))
     out = d / "render" / f"final_{int(scale * 100)}.mp4"

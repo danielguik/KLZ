@@ -36,6 +36,7 @@ const FIELDS={
  stat:[['label','text','Rótulo'],['value','num','Valor',-9999,9999,1],['suffix','text','Sufixo'],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['accent','color','Cor de destaque']],
  floatingWords:[['words','list','Palavras (uma por linha)'],['color','color','Cor'],['fontSize','num','Tamanho',20,160,1]],
  flash:[['color','color','Cor']],
+ textBehind:[['text','list2','Texto (use Enter para quebrar linha)'],['variant','select','Estilo',['solid','outline','gradient']],['y','range','Posição vertical',0,1,.01],['fit','bool','Ajustar à largura'],['fontSize','num','Tamanho máximo',60,900,5],['color','color','Cor'],['accent','color','Cor 2 (gradiente)'],['opacity','range','Opacidade',0,1,.01],['rise','bool','Entrada com movimento']],
  background:[['style','select','Estilo',['aurora','mesh','solid']],['c1','color','Cor base'],['c2','color','Cor 2'],['c3','color','Cor 3'],['speed','range','Velocidade',0,4,.05],['grain','range','Granulado de filme',0,1,.01],['vignette','range','Vinheta',0,1,.01]],
  videoCard:[['x','range','Posição X',0,1,.01],['y','range','Posição Y',0,1,.01],['w','range','Largura',.1,1,.01],['h','range','Altura',.1,1,.01],['shape','select','Formato',['rounded','circle']],['radius','num','Arredondamento',0,200,1],['zoom','range','Recorte: zoom',1,4,.01],['focusX','range','Recorte: foco X',0,1,.01],['focusY','range','Recorte: foco Y',0,1,.01],['borderColor','color','Cor da borda'],['borderWidth','num','Espessura da borda',0,20,1],['glow','color','Brilho'],['enter','select','Entrada',['pop','rise','slide','fade','none']],['trimStart','num','Cortar início (s)',0,900,.05],['volume','range','Volume',0,1,.05]],
  kinetic:[['words','list','Palavras / frases (uma por linha)'],['mode','select','Modo',['stack','marquee','cascade']],['fontSize','num','Tamanho',40,320,1],['y','range','Posição vertical',0,1,.01],['color','color','Cor'],['accent','color','Cor de destaque'],['outline','bool','Só contorno'],['speed','range','Velocidade',.2,4,.05],['rotate','range','Inclinação',-30,30,1],['opacity','range','Opacidade',0,1,.01]],
@@ -49,6 +50,7 @@ const FIELDS={
 };
 const isHex=c=>/^#[0-9a-f]{6}$/i.test(c||'');
 function field(l,f){const[k,type,label,mn,mx,st]=f,v=l[k];
+  if(type==='list2')return`<div class="fld"><label>${label}</label><textarea data-k="${k}" rows="3">${esc(v)}</textarea></div>`;
   if(type==='select')return`<div class="fld"><label>${label}</label><select data-k="${k}">${mn.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
   if(type==='items')return`<div class="fld"><label>${label}</label><textarea data-k="${k}" data-items="1" rows="5">${esc((v||[]).map(i=>i.label+' | '+i.value).join('\n'))}</textarea></div>`;
   if(type==='bool')return`<label class="chk"><input type="checkbox" data-k="${k}" ${v?'checked':''}> ${label}</label>`;
@@ -63,6 +65,8 @@ function tabCamada(b){
   let h=`<div class="btnrow"><button data-act="up">↑ Subir</button><button data-act="down">↓ Descer</button><button data-act="dup">Duplicar</button><button data-act="del" class="danger">Excluir</button></div>`;
   if(l.auto)h+='<div class="hint">Camada automática: as suas edições aqui são mantidas ao refazer vozes. Textos e vozes se editam na aba Frases.</div>';
   h+=FIELDS.common.filter(f=>!(f[0]==='name'&&l.type==='lowerthird')).map(f=>field(l,f)).join('')+(FIELDS[l.type]||[]).map(f=>field(l,f)).join('');
+  if(l.type==='textBehind'){const ok=l.cutout&&l.frames>0,old=ok&&l.cutRange&&(Math.abs(l.cutRange[0]-l.start)>.05||Math.abs(l.cutRange[1]-l.duration)>.05);
+    h+=`<div class="ph"><span>Recorte da pessoa</span></div><div class="hint">${ok?(old?'<span style="color:var(--warn)">Você mudou o início/duração: gere o recorte de novo.</span>':'✔ Recorte pronto ('+l.frames+' quadros). O texto passa por trás da pessoa.'):'O texto só fica <b>atrás</b> da pessoa depois de gerar o recorte dela (leva ~15 s por 3 s de vídeo).'}</div><div class="btnrow"><button class="primary" data-act="cutout" ${busy()?'disabled':''}>${ok?'Gerar o recorte de novo':'Gerar recorte da pessoa'}</button></div>`}
   if(l.type==='video'){h+=`<div class="ph"><span>Zoom em momentos-chave</span><button class="sm" data-act="addzp">+ Zoom</button></div>`;
     h+=(l.zoomPunches||[]).map((z,i)=>`<div class="zp"><div><small>em (s)</small><input type="number" step="0.05" data-zp="${i}" data-f="at" value="${z.at}"></div><div><small>escala</small><input type="number" step="0.01" min="1" max="2" data-zp="${i}" data-f="scale" value="${z.scale}"></div><div><small>duração</small><input type="number" step="0.05" data-zp="${i}" data-f="hold" value="${z.hold}"></div><button data-delzp="${i}" class="danger sm">✕</button></div>`).join('')||'<div class="hint">Nenhum zoom. Adicione para dar ênfase.</div>'}
   b.innerHTML=h;
@@ -76,6 +80,7 @@ function tabCamada(b){
   b.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>layerAct(el.dataset.act,l));
 }
 function layerAct(a,l){const L=LAY(),i=L.indexOf(l);
+  if(a==='cutout'){flushSave().then(()=>startJob(`/api/projects/${PROJ.id}/layers/${l.id}/cutout`,{}));return}
   if(a==='up'&&i<L.length-1)[L[i],L[i+1]]=[L[i+1],L[i]];else if(a==='down'&&i>0)[L[i],L[i-1]]=[L[i-1],L[i]];
   else if(a==='dup'){const c=clone(l);c.id=rid();c.auto=false;delete c.phrase;c.name+=' (cópia)';c.start=+(l.start+.5).toFixed(2);L.splice(i+1,0,c);S.sel=c.id}
   else if(a==='del'){L.splice(i,1);S.sel=null}else if(a==='addzp'){l.zoomPunches=l.zoomPunches||[];l.zoomPunches.push({at:+(S.t-l.start).toFixed(2),scale:1.15,hold:.8})}
@@ -84,6 +89,7 @@ const NEW={title:()=>({type:'title',name:'Título',duration:3,text:'Novo título
  stat:()=>({type:'stat',name:'Número',duration:3.6,label:'Rótulo',value:50,suffix:'%',y:.1,color:'#ffffff',accent:'#ffb020'}),
  glass:()=>({type:'glass',name:'Vidro',duration:4,enter:true,x:.1,y:.4,w:.8,h:.15,radius:36,blur:28,tint:'rgba(10,10,14,0.45)',borderColor:'rgba(255,255,255,0.45)'}),
  floatingWords:()=>({type:'floatingWords',name:'Palavras flutuantes',duration:4,words:['palavra','chave','destaque'],color:'#ffffff',fontSize:54}),
+ textBehind:()=>({type:'textBehind',name:'Texto atrás da pessoa',duration:3.4,text:'TEXTO',y:.28,fontSize:420,fit:true,color:'#ffffff',accent:'#ffb020',variant:'solid',opacity:.95,rise:true,cutout:'',cutFps:30,frames:0,brightness:1,contrast:1,saturate:1}),
  background:()=>({type:'background',name:'Fundo animado',duration:Math.max(2,dur()),style:'aurora',c1:'#0b0b14',c2:'#5b2bd9',c3:'#ff6a3d',speed:1,grain:.18,vignette:.55}),
  videoCard:()=>{const v=LAY().find(l=>l.type==='video');return{type:'videoCard',name:'Vídeo em cartão',duration:Math.max(2,dur()-S.t),src:v?v.src.split('?')[0]:'',trimStart:S.t,volume:0,x:.07,y:.3,w:.86,h:.5,shape:'rounded',radius:56,borderColor:'rgba(255,255,255,0.4)',borderWidth:3,glow:'rgba(124,92,255,0.5)',zoom:1,focusX:.5,focusY:.5,enter:'rise'}},
  kinetic:()=>({type:'kinetic',name:'Texto cinético',duration:4,mode:'stack',words:['PALAVRA','EM','DESTAQUE'],fontSize:150,y:.3,color:'#ffffff',accent:'#ffb020',outline:false,speed:1,rotate:-6,opacity:1}),
@@ -95,7 +101,7 @@ const NEW={title:()=>({type:'title',name:'Título',duration:3,text:'Novo título
  shape:()=>({type:'shape',name:'Forma',duration:4,kind:'rect',x:.1,y:.6,w:.8,h:.14,fill:'rgba(255,255,255,0.08)',stroke:'#ffb020',strokeWidth:4,radius:40,anim:'draw'}),
  transition:()=>({type:'transition',name:'Transição',duration:.9,kind:'wipe',color:'#7c5cff',color2:'#ffb020'}),
  flash:()=>({type:'flash',name:'Flash',duration:.4,color:'#ffffff'})};
-const GROUPS=[['Texto e gráficos',['title','stat','kinetic','barchart','ring','lowerthird','callout']],['Vídeo e fundo',['videoCard','background','grid3d','glass','shape']],['Movimento',['floatingWords','transition','flash']]];
+const GROUPS=[['Texto e gráficos',['textBehind','title','stat','kinetic','barchart','ring','lowerthird','callout']],['Vídeo e fundo',['videoCard','background','grid3d','glass','shape']],['Movimento',['floatingWords','transition','flash']]];
 function buildAdd(){const m=$('#addmenu');m.innerHTML=GROUPS.map(([g,ks])=>`<div class="grp">${g}</div>`+ks.map(k=>`<button data-add="${k}">${TYPES[k]}</button>`).join('')).join('');
   m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{if(!PROJ)return toast('Abra um projeto primeiro.');const o=NEW[b.dataset.add]();const l={id:rid(),auto:false,start:+S.t.toFixed(2),...o};
     PROJ.layers.push(l);recalcDur();S.sel=l.id;saveLayersSoon();TAB='camada';renderAll()})}
@@ -214,15 +220,16 @@ S.hook.lsbox=()=>{
 
 /* ---------- Estilo ---------- */
 function tabEstilo(b){
-  b.innerHTML=`<div class="hint">Aplica de uma vez um visual profissional (como nos vídeos de referência): fundo animado, letreiro rolando, o vídeo recortado em cartão com brilho, título, legendas em caixa e transições automáticas nos cortes de cena. Tudo vira camadas que você pode mexer depois.</div>
+  b.innerHTML=`<div class="hint">Mantém o seu vídeo em tela cheia e põe só efeitos por cima: título e legendas animadas. Os demais efeitos (texto atrás da pessoa, seta, número, identificação, gráficos…) você adiciona pelo menu <b>Adicionar</b>, em camadas editáveis.</div>
    <div class="card"><h4>Visual</h4>
-   <select id="stP"><option value="card">Cartão sobre fundo animado (estilo reels)</option><option value="full">Tela cheia limpa (só título e legendas)</option></select>
+   <select id="stP"><option value="full" selected>Efeitos por cima do vídeo em tela cheia (sem fundo gerado)</option><option value="card">Cartão com fundo animado (opcional)</option></select>
    <input type="text" id="stT" placeholder="Título (ex.: Hopedale, MA)"><input type="text" id="stG" placeholder="Etiqueta pequena (ex.: on site)">
    <input type="text" id="stW" placeholder="Palavras do letreiro, separadas por vírgula (ex.: DOORMAXX, PIVOT DOOR)">
    <input type="number" id="stE" step="0.1" placeholder="Terminar o visual em (s) — vazio = até o fim (depois aparece o vídeo original em tela cheia, ex.: logo final)">
-   <button class="primary" id="stGo" ${busy()?'disabled':''}>Aplicar visual profissional</button></div>
+   <label class="chk" style="padding:2px 0"><input type="checkbox" id="stTr"> Transições nos cortes de cena grandes</label>
+   <button class="primary" id="stGo" ${busy()?'disabled':''}>Aplicar</button></div>
    <div class="hint">As camadas de visual ficam marcadas e são trocadas se você aplicar de novo. As camadas que você criou à mão não são alteradas. Para cada camada nova (gráfico, seta, texto, anel…), use o menu <b>Adicionar</b> à esquerda.</div>`;
-  $('#stGo').onclick=()=>startJob(`/api/projects/${PROJ.id}/style`,{preset:$('#stP').value,title:$('#stT').value,tag:$('#stG').value,words:$('#stW').value.split(',').map(x=>x.trim()).filter(Boolean),end:$('#stE').value?+$('#stE').value:null});
+  $('#stGo').onclick=()=>startJob(`/api/projects/${PROJ.id}/style`,{preset:$('#stP').value,title:$('#stT').value,tag:$('#stG').value,words:$('#stW').value.split(',').map(x=>x.trim()).filter(Boolean),end:$('#stE').value?+$('#stE').value:null,transitions:$('#stTr').checked});
 }
 
 /* ---------- Áudio ---------- */
